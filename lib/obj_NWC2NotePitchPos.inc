@@ -21,15 +21,15 @@ function NWC2NotePitchPos($pos)
 	
 function GetAccidentalPitchOffset()
 {
-	if ($this->Accidental) return intval(nw_aafield($GLOBALS['nwcAccidentalKeys'],$this->Accidental,2))-2;
+	if ($this->Accidental) return intval(nw_aafield(self::$nwcAccidentalOffsets,$this->Accidental,2));
 	return 0;
 }
 
 function GetNoteName($clef)
 {
-  $n = 56 + nwcGetClefStdCenterTone($clef) + $this->Position;
+  $n = 8*WholeNotesPerOctave + self::GetClefStdCenterTone($clef) + $this->Position;
 
-  return nw_aafield($GLOBALS['nwcNoteNames'],intval($n % 7),"Z");
+  return nw_aafield(self::$NoteNames,intval($n % 7),"Z");
 }
 
 function &ReconstructClipText()
@@ -38,26 +38,25 @@ function &ReconstructClipText()
 	if ($this->Tied) $s .= "^";
 	return $s;
 }
+
+// --------------------------
+// Utility definitions statically contained in the NWC2NotePitchPos name space
+static $NoteNames = array('C','D','E','F','G','A','B');
+static $nwcAccidentals = array('v','b','n','#','x');
+static $BaseNoteSemitones = array("C"=>0,"D"=>2,"E"=>4,"F"=>5,"G"=>7,"A"=>9,"B"=>11);
+static $ClefCenterTones = array("Treble"=>34,"Bass"=>22,"Alto"=>28,"Tenor"=>26,"Drum"=>22);
+//
+// These are initialized below
+static $NoteNamesKey;
+static $nwcAccidentalOffsets;
+//
+static function GetClefStdCenterTone($clef) {return nw_aafield(self::$ClefCenterTones,$clef,self::$ClefCenterTones['Treble']);}
+
 };
 
-// ------------------------------------
-// Utility vars and functions
-// ------------------------------------
-$nwcNoteNames = array('A','B','C','D','E','F','G');
-$nwcNoteKeys = array_flip($nwcNoteNames);
-$nwcAccidentals = array('v','b','n','#','x');
-$nwcAccidentalKeys = array_flip($nwcAccidentals);
-$nwcClefCenterTones = array(
-	"Treble"	=>intval((4*7) + $nwcNoteKeys['B']),
-	"Bass"		=>intval((2*7) + $nwcNoteKeys['D']),
-	"Alto"		=>intval((3*7) + $nwcNoteKeys['C']),
-	"Tenor"		=>intval((3*7) + $nwcNoteKeys['A']),
-	"Drum"		=>intval((2*7) + $nwcNoteKeys['D'])
-	);
-
-function nwcGetClefStdCenterTone($clef)
-{
-	return nw_aafield($GLOBALS['nwcClefCenterTones'],$clef,$GLOBALS['nwcClefCenterTones']['Treble']);
-}
+define("WholeNotesPerOctave",count(NWC2NotePitchPos::$NoteNames));
+NWC2NotePitchPos::$NoteNamesKey = array_flip(NWC2NotePitchPos::$NoteNames);
+NWC2NotePitchPos::$nwcAccidentalOffsets = array_flip(NWC2NotePitchPos::$nwcAccidentals);
+array_walk(NWC2NotePitchPos::$nwcAccidentalOffsets,create_function('&$v,$k','$v-=2;'));
 
 ?>

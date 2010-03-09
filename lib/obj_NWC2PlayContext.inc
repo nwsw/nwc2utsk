@@ -7,8 +7,8 @@ class NWC2PlayContext {
 var $Clef="Treble";
 var $ClefOctave="None";
 var $Transposition=0;
-var $Key=array('A'=>0,'B'=>0,'C'=>0,'D'=>0,'E'=>0,'F'=>0,'G'=>0);
-var $RunKey=array('A'=>0,'B'=>0,'C'=>0,'D'=>0,'E'=>0,'F'=>0,'G'=>0);
+var $Key=array('C'=>0,'D'=>0,'E'=>0,'F'=>0,'G'=>0,'A'=>0,'B'=>0);
+var $RunKey=array('C'=>0,'D'=>0,'E'=>0,'F'=>0,'G'=>0,'A'=>0,'B'=>0);
 var $Ties=array();
 var $Slur=false;
 
@@ -33,14 +33,45 @@ function SaveRestoreContext(&$o)
 		}
 }
 
+function GetOctaveShift()
+{
+	switch ($this->ClefOctave) {
+		case "Octave Up":   return 1;
+		case "Octave Down": return -1;
+		}
+
+	return 0;
+}
+
+function GetPlayPitchShift() { return (12 * $this->GetOctaveShift()) + $this->Transposition; }
+
 function GetNotePitchName(&$notepitchObj) { return $notepitchObj->GetNoteName($this->Clef); }
 
 function GetNotePitchAccidental(&$notepitchObj)
 {
 	$n = $notepitchObj->GetNoteName($this->Clef);
 	$a = $notepitchObj->Accidental;
-	if (!$a) $a = $GLOBALS['nwcAccidentals'][$this->RunKey[$n]+2];
+	if (!$a) $a = NWC2NotePitchPos::$nwcAccidentals[$this->RunKey[$n]+2];
 	return $a;
+}
+
+function GetScientificPitchOctave(&$notepitchObj)
+{
+	return intval((NWC2NotePitchPos::GetClefStdCenterTone($this->Clef) + $notepitchObj->Position) / WholeNotesPerOctave) + $this->GetOctaveShift();
+}
+
+function GetNoteMidiPitch(&$notepitchObj)
+{
+	$d = 12 * ($this->GetScientificPitchOctave($notepitchObj)+1);
+	$d += nw_aafield(NWC2NotePitchPos::$BaseNoteSemitones,$this->GetNotePitchName($notepitchObj),0);
+	$d += nw_aafield(NWC2NotePitchPos::$nwcAccidentalOffsets,$this->GetNotePitchAccidental($notepitchObj),0);
+	$d += $this->Transposition;
+
+	// Midify any beyond boundary values
+	if ($d < 0) $d = 12 - (abs($d) % 12);
+	else if ($d > 127) $d = 115 + (($d - 115) % 12);
+
+  return $d;
 }
 
 function IsTieReceiver(&$notepitchObj) 
@@ -67,7 +98,7 @@ function UpdateContext(&$o)
 
 			$notename = $notepitchObj->GetNoteName($this->Clef);
 			$noteacc = $notepitchObj->Accidental;
-			if (!$noteacc) $noteacc = $GLOBALS['nwcAccidentals'][$this->RunKey[$notename]+2];
+			if (!$noteacc) $noteacc = NWC2NotePitchPos::$nwcAccidentals[$this->RunKey[$notename]+2];
 			$tieKey = $noteacc.$notepitchObj->Position;
 
 			$runningTieKey = array_search($tieKey,$this->Ties);
@@ -94,7 +125,7 @@ function UpdateContext(&$o)
 
 		case "Key":
 			$k = $o->GetTaggedOpt('Signature',array());
-			foreach ($GLOBALS['nwcNoteNames'] as $notename) {
+			foreach (NWC2NotePitchPos::$NoteNames as $notename) {
 				$a = 0;
 				if (isset($k[$notename."b"])) $a--;
 				else if (isset($k[$notename."#"])) $a++;
