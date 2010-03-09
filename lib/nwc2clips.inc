@@ -1,14 +1,18 @@
 <?php
 function NWC2ClipLibVersion() {return 1.50;}
 /*******************************************************************************
-This is a support API for interfacing to NWC2 clip text.
+This is a support API for interfacing to NWC2 clip text. A forum dedicated to 
+NWC2 user tools can be found here:
 
-Copyright © 2008 by NoteWorthy Software, Inc.
+NoteWorthy Composer > User Tools
+http://my.noteworthysoftware.com/?board=7.0
+
+Copyright © 2009 by NoteWorthy Software, Inc.
 All Rights Reserved
 
 HISTORY:
 ================================================================================
-[2008-01-28] Version 1.50: Migrate to php5, support web scripts, add NWC2PlayContext class and supporting methods
+[2009-10-02] Version 1.50: Migrate to php5 and add note name script, support for web scripts, and NWC2PlayContext class
 [2007-01-03] Version 1.22: Fixed bug in function ReconstructClipText
 [2006-09-05] Version 1.21: Library classes moved into own files
 [2006-05-12] Version 1.20: Clean up source formatting
