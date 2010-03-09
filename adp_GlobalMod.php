@@ -11,8 +11,9 @@
 //  2/12/04 1.0.2 ADP   Added message for empty selection
 //  11/3/05 1.1 ADP Added a "negative" (using '!')
 //  2006-08-11 1.2 nwsw Added support for escaping commas in the "<comparison>" section, small code clean up
+//  2009-10-11 1.5 nwsw Clean up PHP5 warnings
 // 
-// For documentation, see help_msg_and_exit (about line 35)
+// For documentation, see help_msg_and_exit (down a few lines)
 
 require_once("lib/nwc2clips.inc");
 
@@ -73,13 +74,12 @@ exit(NWC2RC_REPORT) ;
 
 function inform($string) { fputs(STDERR, $string) ; }
 
-function &gm_getTaggedOpt($tag, &$o)		// eg tag might be Dur.DblDotted or Opts.VertOffset
+function gm_getTaggedOpt($tag, &$o)		// eg tag might be Dur.DblDotted or Opts.VertOffset
 {
-	$result = FALSE ;
-	$opts =& $o->GetOpts() ;
+	$opts = $o->GetOpts() ;
 	foreach (explode(".",$tag) as $t) {
-		if (!isset($opts[$t])) return ($result = FALSE) ;
-		$opts =& $opts[$t] ;
+		if (!isset($opts[$t])) return FALSE ;
+		$opts = $opts[$t] ;
 	}
 	return $opts ;
 }
@@ -137,8 +137,18 @@ class gm_match
             else if (gm_getTaggedOpt($presence,$o)===FALSE) return FALSE ;
 		foreach ($this->comparisons as $opt => $comp) // eg "Pos" => "<" or "Dur" => "==". $comparesTo has the value to compare to
 		{
-			if (($optVal = gm_getTaggedOpt($opt,$o)) === FALSE) return FALSE ;	// getTaggedOpt might return 0 or FALSE, need to equate to type as well
-			if (is_array($optVal)) { if (count($optVal) == 1) $optVal = array_shift(array_keys($optVal)) ; else return FALSE ; }
+			$optVal = gm_getTaggedOpt($opt,$o);
+
+			if ($optVal === FALSE) return FALSE ;	// getTaggedOpt might return 0 or FALSE, need to equate to type as well
+
+			if (is_array($optVal)) 
+			{ 
+				if (count($optVal) != 1) return FALSE ; 
+				
+				$optVal = array_keys($optVal); 
+				$optVal = $optVal[0];
+			}
+
 			$optVal = rtrim($optVal) ;
 			switch ($comp) 
 			{
@@ -201,14 +211,15 @@ class gm_action
 		{
 			case GM_DELETE: break ;	// do nothing, as the action is to NOT PRINT
 			case GM_MOD:
-				$opts =& gm_getTaggedOpt($this->ActionTarget,$o) ;
+				$opts = gm_getTaggedOpt($this->ActionTarget,$o) ;
 				if ($opts === FALSE && !(in_array($this->ActionMod, array("+=", "-="))))	// if value doesn't exist, can't modify
 				{
 					inform("Couldn't perform ".$this->ActionTarget.$this->ActionMod.$this->ActionValue." in " . $o->ReconstructClipText()."\n") ;
 					break ; 
 				}
 				if ($opts == FALSE) 	// but we make an exception for += and -=, since 0 is often a default value for these
-					gm_setTaggedOpt($this->ActionTarget,$o,0) ;
+					$opts = 0;
+
 				switch ($this->ActionMod)			// now we can do the action
 				{
 					case "+=" :	$opts += $this->ActionValue ;	break ;
@@ -217,6 +228,7 @@ class gm_action
 					case "/=" :	$opts /= $this->ActionValue ;	break ;
 				}
 				$opts = (string) round($opts) ; // convert numbers back to string for correct interpretation by ReconstructClipText 
+				gm_setTaggedOpt($this->ActionTarget,$o,$opts) ;
 				break ;
 			case GM_SET:
 				gm_setTaggedOpt($this->ActionTarget,$o,$this->ActionValue) ;
@@ -244,8 +256,8 @@ class gm_match_action_pair
 $map_array = array ( ) ;
 // THE MAIN ACTION STARTS HERE
 array_shift($argv) ;		// get rid of the first arg (script name)
-if ($argv[0] && $argv[0] == "help") help_msg_and_exit() ;
 if (!count($argv)) abort("Hey! We need somethin' to do here, y'know! Try something of the form <type>,<subtype>,... <action>\nor use \"help\" for more details.") ;
+if ($argv[0] && $argv[0] == "help") help_msg_and_exit() ;
 if (count($argv) % 2) abort("Parameters need to be a multiple of two. Each pair being <type>,<subtype>,... <action>.\nUse \"help\" for more help.") ;
 while (count($argv))
 {

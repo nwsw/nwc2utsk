@@ -10,7 +10,7 @@ text is suitable for inclusion as a lyric, and so that the necessary clef
 and signature information is included at the start of the clip.
 
 Prompting for staff mode can be added with the following command line:
-"/mode=inline" "/font=<PROMPT:Select Font:=|User 1|User 2|User 3|User 4|User 5|User 6>" "/staffpos=<PROMPT:Position:=#[-32,32]"
+"/mode=inline" "/font=<PROMPT:Select Font:=|User 1|User 2|User 3|User 4|User 5|User 6>" "/staffpos=<PROMPT:Position:=#[-32,32]>"
 
 Prompting for staff versus lyric mode can be added with the following command line:
 "/mode=<PROMPT:Mode:=|inline|lyric>"

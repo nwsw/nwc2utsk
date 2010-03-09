@@ -24,7 +24,7 @@ function SaveRestoreContext(&$o)
 		$endings = $o->GetTaggedOpt('Endings',array());
 		if (isset($endings[1]) && !$this->SeenFirstEnding) {
 			$this->SeenFirstEnding = true;
-			$Ending1Context = array();
+			$this->Ending1Context = array();
 			foreach($varlist as $v) $this->Ending1Context[$v] = $this->$v;
 			}
 		else if ($this->SeenFirstEnding && !isset($endings[1])) {
@@ -57,7 +57,7 @@ function UpdateContext(&$o)
 		if (empty($notes)) $notes = $notes2;
 		else if (!empty($notes2)) {
 			// Merge the stem down notes with the stem up notes
-			if (isset($o->Opts["Stem"]) && ($o->Opts["Stem"] == "Up")) if ($start2->Position < $start1->Position) $notes = array_merge($notes2,$notes);
+			if (isset($o->Opts["Stem"]) && ($o->Opts["Stem"] == "Up")) $notes = array_merge($notes2,$notes);
 			else $notes = array_merge($notes,$notes2);
 			}
 
