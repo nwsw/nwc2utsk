@@ -47,9 +47,15 @@ function NWC2ClipItem($itemtext)
 
 function &GetObjType() {return $this->ObjType;}
 function &GetOpts() {return $this->Opts;}
-function &GetTaggedOpt($tag) {
-	$nonexistent = false;
+function &GetTaggedOpt($tag,$nonexistent=false) {
 	if (isset($this->Opts[$tag])) return $this->Opts[$tag];
+	return $nonexistent;
+	}
+function GetTaggedOptAsArray($tag,$nonexistent=false) {
+	if (isset($this->Opts[$tag])) {
+		if (is_array($this->Opts[$tag])) return $this->Opts[$tag];
+		return array($this->Opts[$tag]);
+		}
 	return $nonexistent;
 	}
 

@@ -8,9 +8,16 @@ var $Version="";
 var $Mode="";
 var $Items=array();
 
-function NWC2Clip($srcfile) 
+function NWC2Clip($src='php://stdin')
 {
-	$this->Items = file($srcfile);
+	if (is_array($src)) $this->Items = $src;
+	else if (!strstr($src,"\n")) $this->Items = file($src);
+	else if (($line = strtok($src,"\n")) !== false) {
+		while ($line !== false) {
+			$this->Items[] = $line."\n";
+			$line = strtok("\n");
+			}
+		}
 
 	if (!is_array($this->Items))
 		trigger_error("Clip text from NoteWorthy Composer 2 is required as input to the NWC2Clip object",E_USER_ERROR);

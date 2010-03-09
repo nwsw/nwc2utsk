@@ -1,13 +1,14 @@
 <?php
-function NWC2ClipLibVersion() {return 1.22;}
+function NWC2ClipLibVersion() {return 1.50;}
 /*******************************************************************************
 This is a support API for interfacing to NWC2 clip text.
 
-Copyright © 2006 by NoteWorthy Software, Inc.
+Copyright © 2008 by NoteWorthy Software, Inc.
 All Rights Reserved
 
 HISTORY:
 ================================================================================
+[2008-01-28] Version 1.50: Migrate to php5, support web scripts, add NWC2PlayContext class and supporting methods
 [2007-01-03] Version 1.22: Fixed bug in function ReconstructClipText
 [2006-09-05] Version 1.21: Library classes moved into own files
 [2006-05-12] Version 1.20: Clean up source formatting
@@ -16,25 +17,28 @@ HISTORY:
 [2004-10-27] Version 1.00: Initial release
 *******************************************************************************/
 
-// Require PHP 4.3 as a base line for all scripts
-if (phpversion() < "4.3") {
-	fputs(STDERR,"Error: The nwc2phplib library requires PHP version 4.3 or later. You are using version ".phpversion()."\n");
-	exit(1);
-	}
+if (!function_exists('nw_aafield')) {
+function nw_aafield(&$a,$key,$fv="") {if (isset($a[$key])) return $a[$key]; return $fv;}
+}
 
-// Set an error handler that directs most run-time errors via STDERR
-set_error_handler("NWC2ErrorHandler");
-//
-function NWC2ErrorHandler($errno, $errstr, $errfile, $errline) 
+function NWC2ErrorHandler($errno, $errstr, $errfile, $errline)
 {
 	$errtags = array(E_USER_ERROR => "Error",E_USER_WARNING => "Warning");
-	$errtag = isset($errtags[$errno]) ? $errtags[$errno] : "Note";
+	$errtag = nw_aafield($errtags,$errno,"Note");
 
 	fputs(STDERR,"$errtag: [in $errfile, at line $errline]\n");
 	if ($errstr) fputs(STDERR,"--> $errstr\n");
 
 	if ($errno == E_USER_ERROR) exit(1);
 }
+
+// Set an error handler that directs most run-time errors to STDERR. If "html_errors" is enabled, 
+// then it is assumed that the web developer is handling errors via their htaccess (Apache) file
+// or other similar web server function
+if (!ini_get("html_errors")) set_error_handler("NWC2ErrorHandler");
+//
+// Require PHP 5.2 as a base line for all scripts
+if (phpversion() < "5.2") trigger_error("The nwc2clips library requires PHP version 5.2 or later. You are using version ".phpversion()."\n",E_USER_ERROR);
 
 define("NWC2_STARTCLIP","!NoteWorthyComposerClip");
 define("NWC2_ENDCLIP","!NoteWorthyComposerClip-End");
@@ -64,4 +68,5 @@ function NWC2ClassifyOptTag($ObjType,$Tag)
 include("obj_NWC2Clip.inc");
 include("obj_NWC2ClipItem.inc");
 include("obj_NWC2NotePitchPos.inc");
+include("obj_NWC2PlayContext.inc");
 ?>
