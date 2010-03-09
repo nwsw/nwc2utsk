@@ -43,6 +43,11 @@ function GetClipHeader()
 { 
 	return NWC2_STARTCLIP."(".$this->Version.",".$this->Mode.")";
 }
+
+function GetClipFooter()
+{ 
+	return NWC2_ENDCLIP;
+}
 };
 
 ?>

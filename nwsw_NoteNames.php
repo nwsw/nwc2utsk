@@ -1,13 +1,12 @@
 <?
 /*******************************************************************************
-nwsw_NoteNames.php Version 1.50
+nwsw_NoteNames.php Version 1.51
 
 This script will will automatically create text that includes all of the note 
 names for the notes in the staff.
 
 Note: In lyric mode, you should always select the entire staff so that the 
-text is suitable for inclusion as a lyric, and so that the necessary clef 
-and signature information is included at the start of the clip.
+text is suitable for inclusion as a lyric.
 
 Prompting for staff mode can be added with the following command line:
 "/mode=inline" "/font=<PROMPT:Select Font:=|User 1|User 2|User 3|User 4|User 5|User 6>" "/staffpos=<PROMPT:Position:=#[-32,32]>"
@@ -15,11 +14,12 @@ Prompting for staff mode can be added with the following command line:
 Prompting for staff versus lyric mode can be added with the following command line:
 "/mode=<PROMPT:Mode:=|inline|lyric>"
 
-Copyright © 2009 by NoteWorthy Software, Inc.
+Copyright © 2010 by NoteWorthy Software, Inc.
 All Rights Reserved
 
 HISTORY:
 ================================================================================
+[2010-02-27] Version 1.51: Enhanced to support new NWC 2.1 features
 [2009-10-02] Version 1.50: Adapted for inclusion in the NWC2 Starter Kit Version 1.5
 [2008-02-01] Version 1.00: Initial release for the web site
 *******************************************************************************/
@@ -60,7 +60,12 @@ $barnotecnt = 0;
 
 $PlayContext = new NWC2PlayContext();
 foreach ($clip->Items as $item) {
-	$o = new NWC2ClipItem($item);
+	$o = new NWC2ClipItem($item,true);
+
+	if ($o->IsContextInfo()) {
+		$PlayContext->UpdateContext($o);
+		continue;
+		}
 
 	if (in_array($o->GetObjType(),array('Note','Chord','RestChord','Rest'))) {
 		$notenameText = "";

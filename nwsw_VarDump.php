@@ -1,6 +1,6 @@
 <?php
 /*******************************************************************************
-nwswVarDump.php Version 1.01
+nwswVarDump.php Version 1.5
 
 This script outputs a report that shows the object breakdown when using 
 the NWC2Clip and NWC2ClipItem objects to process NWC2 clip text. It uses
@@ -11,6 +11,7 @@ All Rights Reserved
 
 HISTORY:
 ================================================================================
+[2010-02-27] Version 1.50: Add Fake item conversion for cleaner object report
 [2006-05-12] Version 1.01: Code format cleanup
 [2004-10-28] Version 1.00: Initial release
 *******************************************************************************/
@@ -23,7 +24,7 @@ echo "A text representation of the NWC2ClipItem object for each ".
 	"NWC2Clip Version ".NWC2ClipLibVersion().".\n\n";
 
 foreach ($clip->Items as $item) {
-	$o = new NWC2ClipItem($item);
+	$o = new NWC2ClipItem($item,true);
 	echo preg_replace('/[\r\n]+/',"\n",print_r($o,true))."\n";
 	unset($o);
 	}

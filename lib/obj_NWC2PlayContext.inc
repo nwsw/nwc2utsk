@@ -9,6 +9,8 @@ var $ClefOctave="None";
 var $Transposition=0;
 var $Key=array('C'=>0,'D'=>0,'E'=>0,'F'=>0,'G'=>0,'A'=>0,'B'=>0);
 var $RunKey=array('C'=>0,'D'=>0,'E'=>0,'F'=>0,'G'=>0,'A'=>0,'B'=>0);
+var $NextBarNum=1;
+var $PendingBarIncrement=true;
 var $Ties=array();
 var $Slur=false;
 
@@ -111,11 +113,27 @@ function UpdateContext(&$o)
 		foreach ($RunKey_Changes as $notename => $newAccidentalOffset) $this->RunKey[$notename] = $newAccidentalOffset;
 		//
 		if (!isset($o->Opts["Dur"]["Grace"])) $this->Slur = isset($o->Opts["Dur"]["Slur"]);
+
+		if ($this->PendingBarIncrement) {
+			$this->NextBarNum++;
+			$this->PendingBarIncrement = false;
+			}
 		}
 	else switch ($o->GetObjType()) {
+		case "Context":
+			$this->NextBarNum = intval($o->Opts["Bar"][0]);
+			if (in_array("AtStart",$o->Opts["Bar"])) {
+				$this->PendingBarIncrement = true;
+				}
+			else {
+				$this->NextBarNum++;
+				}
+			break;
+
 		case "Bar":
 			$this->RunKey = $this->Key;
 			if ($o->GetTaggedOpt("Style","") == "MasterRepeatOpen") $this->SeenFirstEnding = false;
+      $this->PendingBarIncrement = ($o->GetTaggedOpt("XBarCnt","N") != "Y");
 			break;
 
 		case "Clef":

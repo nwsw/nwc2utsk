@@ -1,5 +1,5 @@
 <?php
-function NWC2ClipLibVersion() {return "1.50.1";}
+function NWC2ClipLibVersion() {return "2.1";}
 /*******************************************************************************
 This is a support API for interfacing to NWC2 clip text. A forum dedicated to 
 NWC2 user tools can be found here:
@@ -7,18 +7,17 @@ NWC2 user tools can be found here:
 NoteWorthy Composer > User Tools
 http://my.noteworthysoftware.com/?board=7.0
 
-Copyright © 2009 by NoteWorthy Software, Inc.
+Copyright © 2010 by NoteWorthy Software, Inc.
 All Rights Reserved
 
 HISTORY:
 ================================================================================
-[2009-10-02] Version 1.50: Migrate to php5 and add note name script, support for web scripts, and NWC2PlayContext class
-[2007-01-03] Version 1.22: Fixed bug in function ReconstructClipText
-[2006-09-05] Version 1.21: Library classes moved into own files
-[2006-05-12] Version 1.20: Clean up source formatting
-[2005-09-12] Version 1.12: Fix ReconstructClipText for Instrument names containing quotes
-[2004-12-01] Version 1.10: Enhancements to allow for empty clips
-[2004-10-27] Version 1.00: Initial release
+[2010-02-27] Support new clip context and notehead color features in NWC 2.1
+[2009-10-02] Migrate to php5, add note name script, support for web scripts, 
+             and NWC2PlayContext class
+[2006-09-05] Library classes moved into own files
+[2004-12-01] Enhancements to allow for empty clips
+[2004-10-27] Initial release
 *******************************************************************************/
 
 if (!function_exists('nw_aafield')) {
@@ -61,6 +60,7 @@ define("NWC2OPT_ASSOCIATIVE",3);
 //
 function NWC2ClassifyOptTag($ObjType,$Tag)
 {
+  if (($Tag == "Bar") && ($ObjType == "Context")) return NWC2OPT_LIST;
 	if (in_array($Tag, array("Opts","Dur","Dur2","Endings"))) return NWC2OPT_ASSOCIATIVE;
 	if (($Tag == "Signature") && ($ObjType == "Key")) return NWC2OPT_ASSOCIATIVE;
 	if (in_array($Tag,array("Text","Name"))) return NWC2OPT_TEXT;
