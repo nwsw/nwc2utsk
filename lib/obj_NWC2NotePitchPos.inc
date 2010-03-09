@@ -36,7 +36,7 @@ function GetNoteName($clef)
   return nw_aafield(self::$NoteNames,intval($n % 7),"Z");
 }
 
-function &ReconstructClipText()
+function ReconstructClipText()
 {
 	$s = $this->Accidental.$this->Position.$this->Notehead;
 	if ($this->Tied) $s .= "^";

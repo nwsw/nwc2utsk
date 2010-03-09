@@ -69,7 +69,7 @@ function IsContextInfo() {
 	return $this->IsFake() || ($this->ObjType == "Context");
 	}
 
-function &ReconstructClipText()
+function ReconstructClipText()
 {
 	if ($this->IsContextInfo()) return "|Fake";
 

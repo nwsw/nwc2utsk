@@ -34,7 +34,12 @@ echo $clip->GetClipHeader()."\n";
 
 $PlayContext = new NWC2PlayContext();
 foreach ($clip->Items as $item) {
-	$o = new NWC2ClipItem($item);
+	$o = new NWC2ClipItem($item,true);
+
+	if ($o->IsContextInfo()) {
+		$PlayContext->UpdateContext($o);
+		continue;
+		}
 
 	$flushPending = false;
 

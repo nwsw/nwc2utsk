@@ -32,7 +32,7 @@ You are currently using version $libver of the NWC2 User Tool Starter Kit.
 __EOMSG;
 //
 fputs(STDOUT,$usermsg);
-phpinfo(INFO_CONFIGURATION+INFO_MODULE+INFO_ENVIRONMENT+INFO_VARIABLES);
+phpinfo();
 
 exit(NWC2RC_REPORT);
 ?>

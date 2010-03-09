@@ -19,7 +19,7 @@ var $Ending1Context=false;
 
 function NWC2PlayContext() { }
 
-function SaveRestoreContext(&$o)
+function SaveRestoreContext($o)
 {
 	$varlist = array("Clef","ClefOctave","Transposition","Key","RunKey","Ties","Slur");
 	if ($o->GetObjType() == "Ending") {
@@ -47,9 +47,9 @@ function GetOctaveShift()
 
 function GetPlayPitchShift() { return (12 * $this->GetOctaveShift()) + $this->Transposition; }
 
-function GetNotePitchName(&$notepitchObj) { return $notepitchObj->GetNoteName($this->Clef); }
+function GetNotePitchName($notepitchObj) { return $notepitchObj->GetNoteName($this->Clef); }
 
-function GetNotePitchAccidental(&$notepitchObj)
+function GetNotePitchAccidental($notepitchObj)
 {
 	$n = $notepitchObj->GetNoteName($this->Clef);
 	$a = $notepitchObj->Accidental;
@@ -57,12 +57,12 @@ function GetNotePitchAccidental(&$notepitchObj)
 	return $a;
 }
 
-function GetScientificPitchOctave(&$notepitchObj)
+function GetScientificPitchOctave($notepitchObj)
 {
 	return intval((NWC2NotePitchPos::GetClefStdCenterTone($this->Clef) + $notepitchObj->Position) / WholeNotesPerOctave) + $this->GetOctaveShift();
 }
 
-function GetNoteMidiPitch(&$notepitchObj)
+function GetNoteMidiPitch($notepitchObj)
 {
 	$d = 12 * ($this->GetScientificPitchOctave($notepitchObj)+1);
 	$d += nw_aafield(NWC2NotePitchPos::$BaseNoteSemitones,$this->GetNotePitchName($notepitchObj),0);
@@ -76,12 +76,12 @@ function GetNoteMidiPitch(&$notepitchObj)
   return $d;
 }
 
-function IsTieReceiver(&$notepitchObj) 
+function IsTieReceiver($notepitchObj) 
 {
 	return array_search($this->GetNotePitchAccidental($notepitchObj).$notepitchObj->Position,$this->Ties) !== false;
 }
 
-function UpdateContext(&$o)
+function UpdateContext($o)
 {
 	if (in_array($o->GetObjType(),array('Note','Chord','Rest','RestChord'))) {
 		$notes = $o->GetTaggedOptAsArray("Pos",array());
@@ -122,12 +122,8 @@ function UpdateContext(&$o)
 	else switch ($o->GetObjType()) {
 		case "Context":
 			$this->NextBarNum = intval($o->Opts["Bar"][0]);
-			if (in_array("AtStart",$o->Opts["Bar"])) {
-				$this->PendingBarIncrement = true;
-				}
-			else {
-				$this->NextBarNum++;
-				}
+			$this->PendingBarIncrement = in_array("AtStart",$o->Opts["Bar"]);
+			if (!$this->PendingBarIncrement) $this->NextBarNum++;
 			break;
 
 		case "Bar":

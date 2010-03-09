@@ -12,8 +12,8 @@ All Rights Reserved
 
 HISTORY:
 ================================================================================
-[2010-02-27] Support new clip context and notehead color features in NWC 2.1
-[2009-10-02] Migrate to php5, add note name script, support for web scripts, 
+[2010-02-28] Support new clip context and notehead color features in NWC 2.1,
+             migrate to php5, add note name script, support for web scripts, 
              and NWC2PlayContext class
 [2006-09-05] Library classes moved into own files
 [2004-12-01] Enhancements to allow for empty clips
@@ -21,7 +21,7 @@ HISTORY:
 *******************************************************************************/
 
 if (!function_exists('nw_aafield')) {
-function nw_aafield(&$a,$key,$fv="") {if (isset($a[$key])) return $a[$key]; return $fv;}
+function nw_aafield($a,$key,$fv="") {if (isset($a[$key])) return $a[$key]; return $fv;}
 }
 
 function NWC2ErrorHandler($errno, $errstr, $errfile, $errline)
