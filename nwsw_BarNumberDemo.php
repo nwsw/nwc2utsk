@@ -73,6 +73,7 @@ foreach ($clip->Items as $item) {
 		}
 	}
 
+if (count($pendingOutput)) echo implode("",$pendingOutput);
 echo $clip->GetClipFooter()."\n";
 exit(NWC2RC_SUCCESS);
 ?>
