@@ -78,7 +78,7 @@ function &ReconstructClipText()
 			switch ($c) {
 				case NWC2OPT_ASSOCIATIVE:
 					$s .= $k2;
-					if ($v2) $s .= "=$v2";
+					if ($v2 !== "") $s .= "=$v2";
 					break;
 
 				default:

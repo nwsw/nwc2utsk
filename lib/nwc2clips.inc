@@ -1,5 +1,5 @@
 <?php
-function NWC2ClipLibVersion() {return 1.21;}
+function NWC2ClipLibVersion() {return 1.22;}
 /*******************************************************************************
 This is a support API for interfacing to NWC2 clip text.
 
@@ -8,6 +8,7 @@ All Rights Reserved
 
 HISTORY:
 ================================================================================
+[2007-01-03] Version 1.22: Fixed bug in function ReconstructClipText
 [2006-09-05] Version 1.21: Library classes moved into own files
 [2006-05-12] Version 1.20: Clean up source formatting
 [2005-09-12] Version 1.12: Fix ReconstructClipText for Instrument names containing quotes
