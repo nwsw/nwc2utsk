@@ -19,15 +19,19 @@ require_once("lib/nwc2clips.inc");
 
 $clip = new NWC2Clip('php://stdin');
 
-echo "A text representation of the NWC2ClipItem object for each ".
+$gzf = gzopen('php://stdout','w');
+
+gzwrite($gzf,"A text representation of the NWC2ClipItem object for each ".
 	"clip line is shown below. This was generated using ".
-	"NWC2Clip Version ".NWC2ClipLibVersion().".\n\n";
+	"NWC2Clip Version ".NWC2ClipLibVersion().".\n\n");
 
 foreach ($clip->Items as $item) {
 	$o = new NWC2ClipItem($item,true);
-	echo preg_replace('/[\r\n]+/',"\n",print_r($o,true))."\n";
+	gzwrite($gzf,preg_replace('/[\r\n]+/',"\n",print_r($o,true))."\n");
 	unset($o);
 	}
+
+gzclose($gzf);
 
 $usermsg = <<<__EOMSG
 See the standard output file for a text representation of the notation 

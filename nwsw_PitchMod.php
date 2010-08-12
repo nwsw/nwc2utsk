@@ -165,8 +165,8 @@ A -r switch at the end of the expression will trigger a report that shows all of
 Example 1: Cb/pos-=1,acc=n -r
 (changes all Cb to B natural)
 
-Example 2: F#/pos+=1,acc=b -r
-(changes F# to Gb)
+Example 2: A#/pos+=1,acc=b -r
+(changes A# to Bb)
 
 Example 3: C/col=0 D/col=1 E/col=2 F/col=3 G/col=4 A/col=5 B/col=6 -r
 (assigns a unique color highlight to each note in the octave)

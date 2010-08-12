@@ -1,8 +1,8 @@
 <?php
 
-// ---------------------
+// -----------------------------------------------------------------------
 class NWC2NotePitchPos {
-// ---------------------
+// -----------------------------------------------------------------------
 
 var $Accidental="";
 var $Position=0;
@@ -12,7 +12,7 @@ var $Color="";
 
 function NWC2NotePitchPos($pos)
 {
-	if (preg_match('/^([\#bnxv]{0,1})(\-{0,1}[0-9]+)([oxXz]{0,1})([\^]{0,1})/',$pos,$m)) {
+	if (preg_match('/^([\#bnxv]{0,1})(\-{0,1}[0-9]+)([oxXzyYabcdefghijklmnpqrstuvw]{0,1})([\^]{0,1})/',$pos,$m)) {
 		$this->Accidental=$m[1];
 		$this->Position=$m[2];
 		$this->Notehead=$m[3];
@@ -64,4 +64,32 @@ NWC2NotePitchPos::$NoteNamesKey = array_flip(NWC2NotePitchPos::$NoteNames);
 NWC2NotePitchPos::$nwcAccidentalOffsets = array_flip(NWC2NotePitchPos::$nwcAccidentals);
 array_walk(NWC2NotePitchPos::$nwcAccidentalOffsets,create_function('&$v,$k','$v-=2;'));
 
+
+// -----------------------------------------------------------------------
+class NWC2ClipItemWithPitchPos extends NWC2ClipItem {
+// -----------------------------------------------------------------------
+
+var $PitchPos = array("Pos" => array(), "Pos2" => array());
+
+// Constructor
+function NWC2ClipItemWithPitchPos($itemtext,$remapFakes=false)
+{
+	parent::__construct($itemtext,$remapFakes);
+
+	if (in_array($this->ObjType, array('Note','Chord','RestChord'))) foreach (array("Pos","Pos2") as $pos_tag) {
+		$notePosList = $this->GetTaggedOptAsArray($pos_tag,false);
+		if (is_array($notePosList)) foreach ($notePosList as $np) $this->PitchPos[$pos_tag][] = new NWC2NotePitchPos($np);
+		}
+}	
+
+function ReconstructPosOpts()
+{
+	foreach (array("Pos","Pos2") as $pos_tag) {
+		if (!isset($this->Opts[$pos_tag])) continue;
+		$this->Opts[$pos_tag] = array();
+		foreach ($this->PitchPos[$pos_tag] as $npp) $this->Opts[$pos_tag][] = $npp->ReconstructClipText();
+		}
+}
+
+};
 ?>

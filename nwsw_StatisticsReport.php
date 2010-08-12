@@ -18,6 +18,7 @@ require_once("lib/nwc2clips.inc");
 $clip = new NWC2Clip('php://stdin');
 
 $typeCounts = array(
+'Spacer' => 0,
 'Clef' => 0,
 'Key' => 0,
 'TimeSig' => 0,

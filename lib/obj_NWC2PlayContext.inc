@@ -9,6 +9,7 @@ var $ClefOctave="None";
 var $Transposition=0;
 var $Key=array('C'=>0,'D'=>0,'E'=>0,'F'=>0,'G'=>0,'A'=>0,'B'=>0);
 var $RunKey=array('C'=>0,'D'=>0,'E'=>0,'F'=>0,'G'=>0,'A'=>0,'B'=>0);
+var $KeyTonic='C';
 var $NextBarNum=1;
 var $PendingBarIncrement=true;
 var $Ties=array();
@@ -21,7 +22,7 @@ function NWC2PlayContext() { }
 
 function SaveRestoreContext($o)
 {
-	$varlist = array("Clef","ClefOctave","Transposition","Key","RunKey","Ties","Slur");
+	$varlist = array("Clef","ClefOctave","Transposition","Key","RunKey","KeyTonic","Ties","Slur");
 	if ($o->GetObjType() == "Ending") {
 		$endings = $o->GetTaggedOpt('Endings',array());
 		if (isset($endings[1]) && !$this->SeenFirstEnding) {
@@ -148,6 +149,7 @@ function UpdateContext($o)
 				}
 
 			$this->RunKey = $this->Key;
+			$this->KeyTonic = $o->GetTaggedOpt("Tonic","C");
 			break;
 
 		case "Instrument":

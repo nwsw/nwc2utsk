@@ -1,5 +1,5 @@
 <?php
-function NWC2ClipLibVersion() {return "2.1";}
+function NWC2ClipLibVersion() {return "2.491";}
 /*******************************************************************************
 This is a support API for interfacing to NWC2 clip text. A forum dedicated to 
 NWC2 user tools can be found here:
@@ -12,6 +12,8 @@ All Rights Reserved
 
 HISTORY:
 ================================================================================
+[2010-07-13] Added NWC2ClipItemWithPitchPos class
+[2010-07-01] Changes for NWC 2.5 support
 [2010-02-28] Support new clip context and notehead color features in NWC 2.1,
              migrate to php5, add note name script, support for web scripts, 
              and NWC2PlayContext class
@@ -50,6 +52,14 @@ define("NWC2_ENDCLIP","!NoteWorthyComposerClip-End");
 define("NWC2RC_SUCCESS",0); // Standard output is processed..contents in standard error is presented as a warning
 define("NWC2RC_ERROR",1);   // Standard error is shown to the user
 define("NWC2RC_REPORT",99); // Standard output is shown to the user
+
+// Cmd flags set in the User Tool command line. Defiend here mostly for documentation purposes.
+define("UTOOL_SEND_CLIPTXT",0);    // Selected notation clip text sent in STDIN (the default)
+define("UTOOL_SEND_FILETXT",1);    // File nwctxt sent in STDIN
+define("UTOOL_ACCEPTS_GZIP",2);    // The nwctxt/clip text in STDIN will be gzip defalated
+define("UTOOL_RETURNS_FILETXT",4); // Script sends a nwctxt file to STDOUT that replaces current file
+define("UTOOL_LONG_TASK",8);       // Task may require a long time to finish
+define("UTOOL_USES_PROMPTS",16);   // Prompts the user for input from within the script
 
 // ----------------------------------------------------------------
 //

@@ -12,6 +12,7 @@
 //  11/3/05 1.1 ADP Added a "negative" (using '!')
 //  2006-08-11 1.2 nwsw Added support for escaping commas in the "<comparison>" section, small code clean up
 //  2009-10-11 1.5 nwsw Clean up PHP5 warnings
+//  2010-07-14 2.0 nwsw Support usage against entire file text 
 // 
 // For documentation, see help_msg_and_exit (down a few lines)
 
@@ -268,11 +269,28 @@ while (count($argv))
 }
 
 $nothingToDo = TRUE ;
+$FileMode = FALSE ;
+
+$zin = gzopen('php://stdin','rb');
+$zout = gzopen('php://stdout','wb');
+
 // should have at least one match, action pair
-$clip = new NWC2Clip('php://stdin');
-echo $clip->GetClipHeader()."\n";
-foreach ($clip->Items as $item) 
+while (!gzeof($zin))
 {
+	$item = gzgets($zin, 32000);
+
+	if (!preg_match('/^\|/',$item)) {
+		gzwrite($zout,$item);
+		if (preg_match('/^\!NoteWorthyComposer\(([0-9\.]+)/',$item,$m)) $FileMode = $m[1];
+		continue;
+		}
+
+	if (preg_match('/^\|(Editor|SongInfo|PgSetup|Font|PgMargins|AddStaff|StaffProperties|StaffInstrument|Lyrics)/',$item)) {
+		// Higher level objects not included in the staff notation are skipped
+		gzwrite($zout,$item);
+		continue;
+		}
+
 	$nothingToDo = FALSE ;
 	$o = new NWC2ClipItem($item);
 	$toDelete = 0 ;
@@ -282,13 +300,17 @@ foreach ($clip->Items as $item)
 		case GM_SET: 
 		case GM_MOD:	$MatchActionPair->ActUpon(&$o) ;
 	}
-	if (!$toDelete) echo $o->ReconstructClipText()."\n" ;
+	if (!$toDelete) gzwrite($zout,$o->ReconstructClipText()."\n") ;
 	unset($o);
 }
-echo NWC2_ENDCLIP."\n";
 
-if ($nothingToDo) abort("This tool requires a selection.
-Please select a section of your staff before invoking global_mods.") ;
+gzclose($zout);
+gzclose($zin);
+
+if ($nothingToDo) {
+	if ($FileMode) abort("Nothing changed.");
+	else abort("This tool requires a selection. Please select a section of your staff before invoking global_mods.") ;
+	}
 
 exit ($final_exit_value) ;
 ?>

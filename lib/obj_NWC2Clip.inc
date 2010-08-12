@@ -11,7 +11,7 @@ var $Items=array();
 function NWC2Clip($src='php://stdin')
 {
 	if (is_array($src)) $this->Items = $src;
-	else if (!strstr($src,"\n")) $this->Items = file($src);
+	else if (!strstr($src,"\n")) $this->Items = gzfile($src);
 	else if (($line = strtok($src,"\n")) !== false) {
 		while ($line !== false) {
 			$this->Items[] = $line."\n";

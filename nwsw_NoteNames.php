@@ -1,6 +1,6 @@
 <?
 /*******************************************************************************
-nwsw_NoteNames.php Version 1.51
+nwsw_NoteNames.php Version 2.00
 
 This script will will automatically create text that includes all of the note 
 names for the notes in the staff.
@@ -19,6 +19,7 @@ All Rights Reserved
 
 HISTORY:
 ================================================================================
+[2010-07-05] Version 2.00: Support for NWC 2.5
 [2010-02-27] Version 1.51: Enhanced to support new NWC 2.1 features
 [2009-10-02] Version 1.50: Adapted for inclusion in the NWC2 Starter Kit Version 1.5
 [2008-02-01] Version 1.00: Initial release for the web site
@@ -54,7 +55,7 @@ $clip = new NWC2Clip('php://stdin');
 if (!$useLyric) $txtout .= $clip->GetClipHeader()."\n";
 
 if ($clip->Mode != "Single") trigger_error("Clip mode of {$clip->Mode} is not supported",E_USER_ERROR);
-if ($clip->Version != "2.0") trigger_error("The notation clip uses an unknown format version ({$clip->Version}), so it may not be processed correctly",E_USER_NOTICE);
+if ($clip->Version > "2.5") trigger_error("The notation clip uses an unknown format version ({$clip->Version}), so it may not be processed correctly",E_USER_NOTICE);
 
 $barnotecnt = 0;
 
