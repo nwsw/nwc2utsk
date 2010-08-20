@@ -37,6 +37,9 @@ if (phpversion() < "5.2") trigger_error("The nwc2clips library requires PHP vers
 define("NWC2_STARTCLIP","!NoteWorthyComposerClip");
 define("NWC2_ENDCLIP","!NoteWorthyComposerClip-End");
 //
+define("NWC2_STARTFILETXT","!NoteWorthyComposer");
+define("NWC2_ENDFILETXT","!NoteWorthyComposer-End");
+//
 // Return codes
 define("NWC2RC_SUCCESS",0); // Standard output is processed..contents in standard error is presented as a warning
 define("NWC2RC_ERROR",1);   // Standard error is shown to the user
@@ -45,7 +48,7 @@ define("NWC2RC_REPORT",99); // Standard output is shown to the user
 // Cmd flags set in the User Tool command line. Defiend here mostly for documentation purposes.
 define("UTOOL_SEND_CLIPTXT",0);    // Selected notation clip text sent in STDIN (the default)
 define("UTOOL_SEND_FILETXT",1);    // File nwctxt sent in STDIN
-define("UTOOL_ACCEPTS_GZIP",2);    // The nwctxt/clip text in STDIN will be gzip defalated
+define("UTOOL_ACCEPTS_GZIP",2);    // The nwctxt/clip text in STDIN can be (optionally) gzip defalated
 define("UTOOL_RETURNS_FILETXT",4); // Script sends a nwctxt file to STDOUT that replaces current file
 define("UTOOL_LONG_TASK",8);       // Task may require a long time to finish
 define("UTOOL_USES_PROMPTS",16);   // Prompts the user for input from within the script
@@ -59,15 +62,51 @@ define("NWC2OPT_ASSOCIATIVE",3);
 //
 function NWC2ClassifyOptTag($ObjType,$Tag)
 {
+	if ($ObjType == "SongInfo") return NWC2OPT_TEXT;
 	if (($Tag == "Bar") && ($ObjType == "Context")) return NWC2OPT_LIST;
 	if (in_array($Tag, array("Opts","Dur","Dur2","Endings"))) return NWC2OPT_ASSOCIATIVE;
 	if (($Tag == "Signature") && ($ObjType == "Key")) return NWC2OPT_ASSOCIATIVE;
-	if (in_array($Tag,array("Text","Name"))) return NWC2OPT_TEXT;
+	if (in_array($Tag,array("Text","Name","Label","Group","Typeface"))) return NWC2OPT_TEXT;
 	if ($Tag == "DynVel") return NWC2OPT_LIST;
 	if (in_array($ObjType,array("Chord","RestChord")) && in_array($Tag,array("Pos","Pos2"))) return NWC2OPT_LIST;
 	return NWC2OPT_RAW;
 }
 
+// ----------------------------------------------------------------
+//
+define("NWC2OBJTYP_ERROR",0);
+define("NWC2OBJTYP_FORMATHEADER",1);
+define("NWC2OBJTYP_COMMENT",2);
+define("NWC2OBJTYP_FILEPROPERTY",3);
+define("NWC2OBJTYP_STAFFPROPERTY",4);
+define("NWC2OBJTYP_STAFFLYRIC",5);
+define("NWC2OBJTYP_STAFFNOTATION",6);
+//
+function NWC2ClassifyObjType($ObjType)
+{
+	if (in_array($m[1],array("Locale","Editor","SongInfo","PgSetup","Font","PgMargins"))) return NWC2OBJTYP_FILEPROPERTY;
+	if (in_array($m[1],array("AddStaff","StaffProperties","StaffInstrument"))) return NWC2OBJTYP_STAFFPROPERTY;
+	if (preg_match($m[1],'/^Lyric[s1-8]/')) return NWC2OBJTYP_STAFFLYRIC;
+	return NWC2OBJTYP_STAFFNOTATION;
+}
+
+function NWC2ClassifyLine($line)
+{
+	if (preg_match($line,'/^\|(A-Za-z0-9]+)/',$m)) return NWC2ClassifyObjType($m[1]);
+
+	switch (substr($line,0,1)) {
+		case '!': return NWC2OBJTYP_FORMATHEADER;
+		case '#': return NWC2OBJTYP_COMMENT;
+		}
+
+	// Treat empty lines as comments
+	if (!trim($line)) return NWC2OBJTYP_COMMENT;
+
+	return NWC2OBJTYP_ERROR;
+}
+
+// ----------------------------------------------------------------
+//
 include("obj_NWC2Clip.inc");
 include("obj_NWC2ClipItem.inc");
 include("obj_NWC2NotePitchPos.inc");
