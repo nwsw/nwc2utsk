@@ -89,9 +89,9 @@ function positionness($pos)
 // converts a position of the form "xz" "#z" "nz or z" "bz" "vz" (double sharp, sharp, natural, flat, double flat)
 //into an integer value 5*z , +2 for x, +1 for #, -1 for b, -2 for v
 {
-    if (preg_match('/^([\#bnxv]{0,1})(\-{0,1}[0-9]+)([oxXz]{0,1})([\^]{0,1})/',$pos,$m))
-	 	{	$Acc=$m[1]; $Pos=$m[2]; $Head=$m[3];   $Tied=$m[4];   }  // should always match
-	 switch ($Acc) {
+	if (preg_match('/^([\#bnxv]{0,1})(\-{0,1}[0-9]+)([oxXz]{0,1})([\^]{0,1})/',$pos,$m))
+	{	$Acc=$m[1]; $Pos=$m[2]; $Head=$m[3];   $Tied=$m[4];   }  // should always match
+	switch ($Acc) {
 		case "x":   return ($Pos * 5 + 2) ; // double sharp
 		case "#":   return ($Pos * 5 + 1) ; // sharp
 		case "n":   return ($Pos * 5 ) ;		// natural
@@ -106,9 +106,9 @@ function findPos($PosOrPos2, $o, $func) // return the extreme of "Pos" or "Pos2"
 	if ($func == 'max') $extreme = -999 ; else $extreme = 999 ;
 	if ($o->GetTaggedOpt($PosOrPos2) === FALSE) return $extreme ;
 	foreach ($o->GetTaggedOpt($PosOrPos2) as $pos)
-	   if ($func == 'max' && positionness($pos) > positionness($extreme))
+		if ($func == 'max' && positionness($pos) > positionness($extreme))
 			{ $extreme = $pos ; }
-	   elseif ($func == 'min' && positionness($pos) < positionness($extreme))
+		elseif ($func == 'min' && positionness($pos) < positionness($extreme))
 			{ $extreme = $pos ; }
 	return $extreme ;
 }  // end findPos
@@ -147,15 +147,15 @@ function &filterPart($action, $part, &$o )
 {
 	global $single, $gobbleTime, $passTime ;
 
-    // convert eg part="pos=bb-4" to part="pos" and filterPos="v-4" ;
+	// convert eg part="pos=bb-4" to part="pos" and filterPos="v-4" ;
 	if (substr($part,0,3)=='pos')
-    {   // convert our double sharps and flats to NWC's x and v notation
-        $part=preg_replace('/##/', 'x', $part) ;
-        $part=preg_replace('/bb/', 'v', $part) ;
-        $filterPos = substr($part,4) ;  // strip off 'pos='
-        $filterPosness = positionness($filterPos) ; // and convert to positionness units
-        $part = 'pos' ;  //  for ease of reference below
-    }
+	{   // convert our double sharps and flats to NWC's x and v notation
+		$part=preg_replace('/##/', 'x', $part) ;
+		$part=preg_replace('/bb/', 'v', $part) ;
+		$filterPos = substr($part,4) ;  // strip off 'pos='
+		$filterPosness = positionness($filterPos) ; // and convert to positionness units
+		$part = 'pos' ;  //  for ease of reference below
+	}
 
 	$oType =& $o->GetObjType() ;  // May need to modify either of these
 	$opts =& $o->GetOpts() ;      //
@@ -169,18 +169,17 @@ function &filterPart($action, $part, &$o )
 		}
 		elseif ($part != 'pos')
 			return $o ;	// Return it as the default top or bottom part
-        else
-        {
-            if ((positionness($opts["Pos"])==$filterPosness && $action=='retain')
-                || (positionness($opts["Pos"])!= $filterPosness && $action=='remove'))
-                return $o ;
-            else
-            {
-              $oType = "Rest" ;
-              $opts = array( "Dur" => $opts["Dur"]) ;   // clear opts except for Dur
-              return $o ;
-            }
-        }
+		else
+		{
+			if ((positionness($opts["Pos"])==$filterPosness && $action=='retain') || (positionness($opts["Pos"])!= $filterPosness && $action=='remove'))
+				return $o ;
+			else
+			{
+				$oType = "Rest" ;
+				$opts = array( "Dur" => $opts["Dur"]) ;   // clear opts except for Dur
+				return $o ;
+			}
+		}
 			
 	}  // end $oType == Note
 
@@ -192,8 +191,8 @@ function &filterPart($action, $part, &$o )
 	$botPos = findPos("Pos", $o, 'min') ;		// and both minima
 	$botPos2 = findPos("Pos2", $o, 'min') ;
 	if (isset($opts["Beam"])) $beam = $opts["Beam"] ; else $beam = NULL ;
-    if (isset($opts["Color"])) $color = $opts["Color"] ; else $color = NULL ;
-    if (isset($opts["Stem"])) $stem = $opts["Stem"] ; else $stem = NULL ;
+		if (isset($opts["Color"])) $color = $opts["Color"] ; else $color = NULL ;
+		if (isset($opts["Stem"])) $stem = $opts["Stem"] ; else $stem = NULL ;
 
 	// Only chords and RestChords remaining
 	if ($action == "retain")
@@ -274,54 +273,54 @@ function &filterPart($action, $part, &$o )
 			$gobbleTime = durationness($dur2) - durationness($dur) ;
 			return $o ;
 		}	// end retain bottoms
-    else    // retain pos
-        {
-            if ($oType=="Chord")
-            {   // search for a match
-                foreach($opts["Pos"] as $pos)
-                {
-                    if (positionness($pos)==$filterPosness)
-                    {   // return a single note of duration Dur
-                        $oType = "Note" ;
-                        $opts = array( "Dur" => $opts["Dur"], "Pos" => $pos) ;
-                        if (isset($beam)) $opts["Beam"] = $beam ;
-                        if (isset($color)) $opts["Color"] = $color ;
-                        if (isset($stem)) $opts["Stem"] = $stem ;
-                        return $o ;
-                    }
-                }
-                if (isset($opts["Pos2"])) foreach($opts["Pos2"] as $pos)
-                    if (positionness($pos)==$filterPosness)
-                    {   // return a single note of duration Dur
-                        $oType = "Note" ;
-                        $opts = array( "Dur" => $opts["Dur2"], "Pos" => $pos) ;
-                        if (isset($beam)) $opts["Beam"] = $beam ;
-                        if (isset($color)) $opts["Color"] = $color ;
-                        if (isset($stem)) $opts["Stem"] = $stem ;
-                        if (durationness($dur) < durationness($dur2))
-					   	   $gobbleTime = durationness($dur2) - durationness($dur) ;
-                        return $o ;
-                     }
-                // no matching pos to retain, so return a rest of the shortest duration (Dur)
-                $oType = "Rest" ;
-                $opts = array( "Dur" => $opts["Dur"]) ;
-                return $o ;
-            }   // end retain pos in chord
-            else    // retain pos in restchord
-            {
-              foreach($opts["Pos2"] as $pos)
-                if (positionness($pos)==$filterPosness)
-                {   // return a restchord with only filterpos of duration Dur
-                    $opts["Pos"] = array($pos) ;
-                    return $o ;
-                }
-                // no matching pos to retain, so return a rest of the shortest duration (Dur)
-                $oType = "Rest" ;
-                $opts = array( "Dur" => $opts["Dur"]) ;
-                return $o ;
-            }   // end retain pos in restchord
-        }	// end retain pos
-    }       // and end retain
+		else    // retain pos
+		{
+			if ($oType=="Chord")
+			{   // search for a match
+				foreach($opts["Pos"] as $pos)
+				{
+					if (positionness($pos)==$filterPosness)
+					{   // return a single note of duration Dur
+						$oType = "Note" ;
+						$opts = array( "Dur" => $opts["Dur"], "Pos" => $pos) ;
+						if (isset($beam)) $opts["Beam"] = $beam ;
+						if (isset($color)) $opts["Color"] = $color ;
+						if (isset($stem)) $opts["Stem"] = $stem ;
+						return $o ;
+					}
+				}
+			if (isset($opts["Pos2"])) foreach($opts["Pos2"] as $pos)
+				if (positionness($pos)==$filterPosness)
+				{   // return a single note of duration Dur
+					$oType = "Note" ;
+					$opts = array( "Dur" => $opts["Dur2"], "Pos" => $pos) ;
+					if (isset($beam)) $opts["Beam"] = $beam ;
+					if (isset($color)) $opts["Color"] = $color ;
+					if (isset($stem)) $opts["Stem"] = $stem ;
+					if (durationness($dur) < durationness($dur2))
+						$gobbleTime = durationness($dur2) - durationness($dur) ;
+						return $o ;
+				}
+			// no matching pos to retain, so return a rest of the shortest duration (Dur)
+			$oType = "Rest" ;
+			$opts = array( "Dur" => $opts["Dur"]) ;
+			return $o ;
+			}   // end retain pos in chord
+			else    // retain pos in restchord
+			{
+				foreach($opts["Pos2"] as $pos)
+					if (positionness($pos)==$filterPosness)
+					{   // return a restchord with only filterpos of duration Dur
+						$opts["Pos"] = array($pos) ;
+						return $o ;
+					}
+				// no matching pos to retain, so return a rest of the shortest duration (Dur)
+				$oType = "Rest" ;
+				$opts = array( "Dur" => $opts["Dur"]) ;
+				return $o ;
+			}   // end retain pos in restchord
+		}	// end retain pos
+	}       // and end retain
 
 // that's it for RETAINing. Now for REMOVing a single part
 // Just need to set gobbletime if removing the last of a shorter note
@@ -332,16 +331,16 @@ function &filterPart($action, $part, &$o )
 			if (positionness($topPos) > positionness($topPos2)
 					|| (positionness($topPos) == positionness($topPos2) && $opts["Opts"]["Stem"] == "Up"))
 			{  // remove the top pos.
-			   filter_out_position_value(&$opts["Pos"], $topPos) ;
+				filter_out_position_value(&$opts["Pos"], $topPos) ;
 				if (!count($opts["Pos"]))
 				{
-				   $opts["Pos"] = $opts["Pos2"] ;   $opts["Dur"] = $opts["Dur2"] ;
-				   unset($opts["Pos2"], $opts["Dur2"]) ;
+					$opts["Pos"] = $opts["Pos2"] ;   $opts["Dur"] = $opts["Dur2"] ;
+					unset($opts["Pos2"], $opts["Dur2"]) ;
 					if (durationness($dur) < durationness($dur2))
 						$gobbleTime = durationness($dur2) - durationness($dur) ;	// need to "swallow" following short notes
 				}
 				if (durationness($dur) > durationness($dur2))
-				   $passTime = durationness($dur) - durationness($dur2) ;
+					$passTime = durationness($dur) - durationness($dur2) ;
 					// if we're removing a note that is longer than other notes in the chord,
 					// what we really want to do is let the next $passtime worth of notes through unfiltered.
 					// Do this in the main loop with 'if "retain" and gobbling then echo'
@@ -361,8 +360,8 @@ function &filterPart($action, $part, &$o )
 		}  // end remove top pos or pos2 in chord with both
 		if ($oType == "Chord")     // plain chord
 		{
-		   filter_out_position_value(&$opts["Pos"], $topPos) ;
-		   return $o ;
+			filter_out_position_value(&$opts["Pos"], $topPos) ;
+			return $o ;
 		}
 		// Only RestChords left. If Stem is upwards, rest is on top. Get rid of it
 		if ($opts["Opts"]["Stem"] == "Up")
@@ -382,61 +381,61 @@ function &filterPart($action, $part, &$o )
 	} // end remove top
 	
 	if ($part == "pos")
-    {   // remove a part (from a chord or restchord) described by pos
-        if ($oType == "Chord")
-        {
-            filter_out_position_value(&$opts["Pos"], $filterPos) ;
-            if (isset($opts["Pos2"])) filter_out_position_value(&$opts["Pos2"], $filterPos) ;
-            if (empty($opts["Pos"]))
-            {
-              if (empty($opts["Pos2"])) // nothing left
-              {
-                $oType = "Rest" ;
-                $opts = array( "Dur" => $opts["Dur"]) ;
-                return $o ;
-              }
-              else  //  no Pos left, but Pos2 is left, so gobble some time
-              {
-                    $gobbleTime = durationness($dur2) - durationness($dur) ;
-                    $opts["Dur"] = $opts["Dur2"] ;  // move Dur2 to Dur
-                    $opts["Pos"] = $opts["Pos2"] ;  // and Pos2 to Pos
-                    unset($opts["Dur2"]) ;
-                    unset($opts["Pos2"]) ;
-                    return $o ;
-              }
-            }
-            else    // $opts["Pos"] is not empty
-            {
-                if (empty($opts["Pos2"]))
-                {
-                    unset($opts["Pos2"]) ;
-                    unset($opts["Dur2"]) ;
-                }
-                return $o ;
-            }
-        }
-        // Wasn't a chord, must be a restchord. Notes are in pos2
-        filter_out_position_value(&$opts["Pos2"], $filterPos) ;
-        if (empty($opts["Pos2"]))
-        {
-            unset($opts["Pos2"]) ;
-            unset($opts["Dur2"]) ;
-            unset($opts["Stem"]) ;
-            $oType = "Rest" ;
-        }
-        return $o ;
-    }   // end remove pos
+	{   // remove a part (from a chord or restchord) described by pos
+		if ($oType == "Chord")
+		{
+			filter_out_position_value(&$opts["Pos"], $filterPos) ;
+			if (isset($opts["Pos2"])) filter_out_position_value(&$opts["Pos2"], $filterPos) ;
+			if (empty($opts["Pos"]))
+			{
+				if (empty($opts["Pos2"])) // nothing left
+				{
+					$oType = "Rest" ;
+					$opts = array( "Dur" => $opts["Dur"]) ;
+					return $o ;
+				}
+				else  //  no Pos left, but Pos2 is left, so gobble some time
+				{
+					$gobbleTime = durationness($dur2) - durationness($dur) ;
+					$opts["Dur"] = $opts["Dur2"] ;  // move Dur2 to Dur
+					$opts["Pos"] = $opts["Pos2"] ;  // and Pos2 to Pos
+					unset($opts["Dur2"]) ;
+					unset($opts["Pos2"]) ;
+					return $o ;
+				}
+			}
+			else    // $opts["Pos"] is not empty
+			{
+				if (empty($opts["Pos2"]))
+				{
+					unset($opts["Pos2"]) ;
+					unset($opts["Dur2"]) ;
+				}
+			return $o ;
+			}
+		}
+		// Wasn't a chord, must be a restchord. Notes are in pos2
+		filter_out_position_value(&$opts["Pos2"], $filterPos) ;
+		if (empty($opts["Pos2"]))
+		{
+			unset($opts["Pos2"]) ;
+			unset($opts["Dur2"]) ;
+			unset($opts["Stem"]) ;
+			$oType = "Rest" ;
+		}
+		return $o ;
+	}   // end remove pos
 	// only removing of bottom part left to do
 	if ($oType == "Chord" && isset($opts["Pos2"]))	// Chords have Pos and optional Pos2
 	{
 		if (positionness($botPos) < positionness($botPos2)
 				|| (positionness($botPos) == positionness($botPos2) && $opts["Opts"]["Stem"] == "Down"))
 		{  // remove the bot pos.
-		   filter_out_position_value(&$opts["Pos"], $botPos) ;
+			filter_out_position_value(&$opts["Pos"], $botPos) ;
 			if (!count($opts["Pos"]))
 			{
-			   $opts["Pos"] = $opts["Pos2"] ;   $opts["Dur"] = $opts["Dur2"] ;
-			   unset($opts["Pos2"], $opts["Dur2"]) ;
+				$opts["Pos"] = $opts["Pos2"] ;   $opts["Dur"] = $opts["Dur2"] ;
+				unset($opts["Pos2"], $opts["Dur2"]) ;
 				if (durationness($dur) < durationness($dur2))
 					$gobbleTime = durationness($dur2) - durationness($dur) ;	// need to "swallow" following short notes
 				elseif (durationness($dur) > durationness($dur2))
@@ -458,8 +457,8 @@ function &filterPart($action, $part, &$o )
 	}  // end remove bot pos or pos2 in chord with both
 	if ($oType == "Chord")     // plain chord
 	{
-	   filter_out_position_value(&$opts["Pos"], $botPos) ;
-	   return $o ;
+		filter_out_position_value(&$opts["Pos"], $botPos) ;
+		return $o ;
 	}
 	// Only RestChords left. If Stem is downwards, rest is on bottom. Get rid of it
 	if ($opts["Opts"]["Stem"] == "Down")
@@ -487,11 +486,10 @@ if ($action == NULL || !in_array($action, array("remove", "retain")))
 
 $part = array_shift($argv) ;
 if ($part == NULL || !preg_match('/(top|bottom|pos=((##|#|b|bb)?-?\d+))/', $part, $matches))
-    {
-        if (substr($part,0,3) != 'pos')
-        	abort("2nd parameter must be top, bottom or pos=<pos>.\nYou used \"$part\"\nUse \"help\" as a first parameter for more help.") ;
-        else abort("You have \"$part\" for the second parameter\n".
-        '
+{
+	if (substr($part,0,3) != 'pos')
+		abort("2nd parameter must be top, bottom or pos=<pos>.\nYou used \"$part\"\nUse \"help\" as a first parameter for more help.") ;
+	else abort("You have \"$part\" for the second parameter\n".'
 When using "pos=<pos>", the keyword is "pos="
 and the <pos> parameter must be of the form
 <accidentals><sign><digits>, where
@@ -503,7 +501,7 @@ eg
 #0 means notes that are on the centre line but have a single sharp accidental
 bb-1 means double flat notes in the space below the centre line
 7 means notes an octave above the centre line') ;
-    }
+}
 
 // process other optional arguments, in no particular order
 foreach ($argv as $arg)
@@ -521,16 +519,16 @@ foreach ($clip->Items as $item)
 	$oType = $o->GetObjType();
 
 	if (!in_array($oType, array("Note","Chord","Rest","RestChord")))   // not an item of interest, pass it thru
-	   echo $item."\n" ;
+		echo $item."\n" ;
 	elseif ($gobbleTime > 0)        // run down the gobble clock, don't print the item
-	   $gobbleTime -= timeTaken($o) ;   
+		$gobbleTime -= timeTaken($o) ;   
 	elseif ($passTime > 0)          // run down the pass time clock, DO print item
 	{
-	   $passTime -= timeTaken($o) ;
-	   echo $item."\n" ;
+		$passTime -= timeTaken($o) ;
+		echo $item."\n" ;
 	}
 	elseif ($oType == "Rest" || !timeTaken($o))        // don't filter on rests or grace notes
-	   echo $item."\n" ;
+		echo $item."\n" ;
 	else                             // else filter out the required parts and print modified item
 	{
 		$o =& filterPart($action, $part, $o) ;

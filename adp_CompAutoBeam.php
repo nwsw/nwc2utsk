@@ -107,7 +107,7 @@ function tryToBeam(&$cG)	// try and beam all beamable notes and chords cG is an 
 	// first of all, which way to beam (and find first and last beamable note)
 	foreach ($cG as $key => $o) if (in_array($o->GetObjType(), array("Note", "Chord")) && ($sBT = smallestBaseTime($o)) && $sBT <=$durArray["8th"])
 	{	// we have a beamable note. NB: we ignore notes > 8ths, and also grace notes
-	   $numObjs++ ;
+		$numObjs++ ;
 		$opts = $o->GetOpts() ;
 		if (isset($opts["Opts"]) && isset($opts["Opts"]["Beam"])) return ; // return because already beamed
 		if ($o->GetObjType() == "Chord") 

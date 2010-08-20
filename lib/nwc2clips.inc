@@ -9,17 +9,6 @@ http://my.noteworthysoftware.com/?board=7.0
 
 Copyright © 2010 by NoteWorthy Software, Inc.
 All Rights Reserved
-
-HISTORY:
-================================================================================
-[2010-07-13] Added NWC2ClipItemWithPitchPos class
-[2010-07-01] Changes for NWC 2.5 support
-[2010-02-28] Support new clip context and notehead color features in NWC 2.1,
-             migrate to php5, add note name script, support for web scripts, 
-             and NWC2PlayContext class
-[2006-09-05] Library classes moved into own files
-[2004-12-01] Enhancements to allow for empty clips
-[2004-10-27] Initial release
 *******************************************************************************/
 
 if (!function_exists('nw_aafield')) {
@@ -70,7 +59,7 @@ define("NWC2OPT_ASSOCIATIVE",3);
 //
 function NWC2ClassifyOptTag($ObjType,$Tag)
 {
-  if (($Tag == "Bar") && ($ObjType == "Context")) return NWC2OPT_LIST;
+	if (($Tag == "Bar") && ($ObjType == "Context")) return NWC2OPT_LIST;
 	if (in_array($Tag, array("Opts","Dur","Dur2","Endings"))) return NWC2OPT_ASSOCIATIVE;
 	if (($Tag == "Signature") && ($ObjType == "Key")) return NWC2OPT_ASSOCIATIVE;
 	if (in_array($Tag,array("Text","Name"))) return NWC2OPT_TEXT;

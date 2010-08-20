@@ -173,10 +173,10 @@ foreach ($clip->Items as $item)
 		transpose($t) ;
 		echo $o->ReconstructClipText()."\n" ;
 	}
-  else echo $item ;
-  unset($o);
+	else echo $item ;
+	unset($o);
 }
-  
+
 echo NWC2_ENDCLIP."\n";
 if ($nothingToDo) abort("This tool requires a selection.
 Please select something on the staff before invoking transpose_chords.") ;

@@ -31,9 +31,9 @@ function GetAccidentalPitchOffset()
 
 function GetNoteName($clef)
 {
-  $n = 8*WholeNotesPerOctave + self::GetClefStdCenterTone($clef) + $this->Position;
+	$n = 8*WholeNotesPerOctave + self::GetClefStdCenterTone($clef) + $this->Position;
 
-  return nw_aafield(self::$NoteNames,intval($n % 7),"Z");
+	return nw_aafield(self::$NoteNames,intval($n % 7),"Z");
 }
 
 function ReconstructClipText()

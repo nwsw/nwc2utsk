@@ -133,9 +133,9 @@ class gm_match
 	// an option was named with a comparison, it must compare true. Any failures return false. It's a hard world.
 	{
 		if ($o->GetObjType() != $this->maintype) return FALSE ;
-        foreach ($this->present as $presence => $val)   // check for matching presence or absence
-            if ($presence{0} == '!') { if (gm_getTaggedOpt(substr($presence,1),$o)!==FALSE) return FALSE ; }
-            else if (gm_getTaggedOpt($presence,$o)===FALSE) return FALSE ;
+		foreach ($this->present as $presence => $val)   // check for matching presence or absence
+			if ($presence{0} == '!') { if (gm_getTaggedOpt(substr($presence,1),$o)!==FALSE) return FALSE ; }
+			else if (gm_getTaggedOpt($presence,$o)===FALSE) return FALSE ;
 		foreach ($this->comparisons as $opt => $comp) // eg "Pos" => "<" or "Dur" => "==". $comparesTo has the value to compare to
 		{
 			$optVal = gm_getTaggedOpt($opt,$o);

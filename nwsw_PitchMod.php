@@ -123,11 +123,11 @@ function BuildEvalAction($cmd)
 	if (!$fldName) doHelp("Invalid option: $option\n");
 
 	if (in_array($op,array('+=','-='))) {
-	  if (!in_array($option,array('pos','col'))) doHelp("Invalid cmd: $cmd\n");
+		if (!in_array($option,array('pos','col'))) doHelp("Invalid cmd: $cmd\n");
 		$val = intval($val);
 		}
 	else {
-	  if (in_array($option,array('pos','col'))) {
+		if (in_array($option,array('pos','col'))) {
 			$val = intval($val);
 			}
 		else {

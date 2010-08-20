@@ -74,7 +74,7 @@ function GetNoteMidiPitch($notepitchObj)
 	if ($d < 0) $d = 12 - (abs($d) % 12);
 	else if ($d > 127) $d = 115 + (($d - 115) % 12);
 
-  return $d;
+	return $d;
 }
 
 function IsTieReceiver($notepitchObj) 
@@ -130,7 +130,7 @@ function UpdateContext($o)
 		case "Bar":
 			$this->RunKey = $this->Key;
 			if ($o->GetTaggedOpt("Style","") == "MasterRepeatOpen") $this->SeenFirstEnding = false;
-      $this->PendingBarIncrement = ($o->GetTaggedOpt("XBarCnt","N") != "Y");
+			$this->PendingBarIncrement = ($o->GetTaggedOpt("XBarCnt","N") != "Y");
 			break;
 
 		case "Clef":

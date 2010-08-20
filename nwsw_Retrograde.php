@@ -147,7 +147,7 @@ foreach ($clip->Items as $c) {
 		// retrograded work.
 		$this_c = $c;
 		$c = false;
-	 
+
 		if ($previousItemType != "Bar") {
 			$currentBarFlowZone++;
 			$barFlowZones[$currentBarFlowZone] = array();

@@ -64,7 +64,7 @@ foreach ($clip->Items as $item) {
 	$o = new NWC2ClipItem($is_fake ? (trim(substr($item,5))."|Fake") : $item);
 
 	if ($is_fake) {
-	  $PlayContext->UpdateContext($o);
+		$PlayContext->UpdateContext($o);
 		continue;
 		}
 

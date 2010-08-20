@@ -48,8 +48,8 @@ foreach ($clip->Items as $item) {
 		else $priorBarIndex = count($pendingOutput);
 		}
 	else if (IsPossibleBarNumber($o)) {
-	  if (count($pendingOutput) && ($priorBarIndex == (count($pendingOutput)-1))) {
-		  // Remove this existing bar number. If a new one is needed, it will be added later.
+		if (count($pendingOutput) && ($priorBarIndex == (count($pendingOutput)-1))) {
+			// Remove this existing bar number. If a new one is needed, it will be added later.
 			continue;
 			}
 		}

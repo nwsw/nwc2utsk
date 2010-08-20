@@ -13,7 +13,7 @@ while (!gzeof($zin)) {
 		$spacer = new NWC2ClipItem($l);
 		if (!empty($spacer->Opts["Width"])) {
 			if ($spacer->Opts["Width"] > 60) $do_warning = true;
-		  $spacer->Opts["Width"] *= 25;
+			$spacer->Opts["Width"] *= 25;
 			$l = $spacer->ReconstructClipText()."\r\n";
 			$numchanges++;
 			}

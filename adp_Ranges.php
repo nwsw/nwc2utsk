@@ -84,14 +84,14 @@ $clip = new NWC2Clip('php://stdin');
 // 1. Scan each line
 foreach ($clip->Items as $item) 
 {
-  $o = new NWC2ClipItem($item);
-  $oType = $o->GetObjType();
-  if ($oType == "Note") CheckExtremes($o->GetTaggedOpt("Pos")) ;
-  elseif ($oType == "RestChord") CheckExtremes($o->GetTaggedOpt("Pos2")) ;
-  elseif ($oType == "Chord") {CheckExtremes($o->GetTaggedOpt("Pos")) ;	CheckExtremes($o->GetTaggedOpt("Pos2")) ;  }
-  unset($o);
+	$o = new NWC2ClipItem($item);
+	$oType = $o->GetObjType();
+	if ($oType == "Note") CheckExtremes($o->GetTaggedOpt("Pos")) ;
+	elseif ($oType == "RestChord") CheckExtremes($o->GetTaggedOpt("Pos2")) ;
+	elseif ($oType == "Chord") {CheckExtremes($o->GetTaggedOpt("Pos")) ;	CheckExtremes($o->GetTaggedOpt("Pos2")) ;  }
+	unset($o);
 }
-  
+
 // 2. Check if we scanned any notes
 if ($maximum == -999)		// Bail out if no notes or chords or restchords
 	abort("No notes found!") ;
