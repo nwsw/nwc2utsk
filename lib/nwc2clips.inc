@@ -78,7 +78,7 @@ function NWC2ClassifyLine($line)
 //
 function NWC2GetObjType($line)
 {
-	if (preg_match('/^\|(A-Za-z0-9]+)/',$line,$m)) return $m[1];
+	if (preg_match('/^\\|([A-Za-z0-9]+)/',$line,$m)) return $m[1];
 	return '';
 }
 
