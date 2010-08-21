@@ -22,16 +22,23 @@ function NWC2Clip($src='php://stdin')
 	if (!is_array($this->Items))
 		trigger_error("Clip text from NoteWorthy Composer 2 is required as input to the NWC2Clip object",E_USER_ERROR);
 
-	if (count($this->Items) < 2)
+	while (count($this->Items)) {
+		$hdr = trim(array_shift($this->Items));
+
+		if (NWC2ClassifyLine($hdr) == NWCTXTLTYP_FORMATHEADER) {
+			if (preg_match('/^'.NWC2_STARTCLIP.'\(([0-9]+)\.([0-9]+)\,([a-zA-Z0-9_]+)/',$hdr,$m)) {
+				$this->Version = "$m[1].$m[2]";
+				$this->Mode = $m[3];
+				break;
+				}
+			
+			trigger_error("Unrecognized notation clip format header",E_USER_ERROR);
+			}
+		}
+
+	if (!count($this->Items))
 		trigger_error("Format error in the clip text",E_USER_ERROR);
 
-	$hdr = trim(array_shift($this->Items));
-
-	if (preg_match('/^'.NWC2_STARTCLIP.'\(([0-9]+)\.([0-9]+)\,([a-zA-Z0-9_]+)/',$hdr,$m)) {
-		$this->Version = "$m[1].$m[2]";
-		$this->Mode = $m[3];
-		}
-	else trigger_error("Unrecognized notation clip format",E_USER_ERROR);
 	//
 	$ftr = false;
 	while (($ftr != NWC2_ENDCLIP) && (count($this->Items) > 0)) $ftr = trim(array_pop($this->Items));
