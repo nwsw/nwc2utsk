@@ -91,9 +91,9 @@ define("NWC2OBJTYP_STAFFNOTATION",4);
 function NWC2ClassifyObjType($ObjType)
 {
 	if (!$ObjType) return NWC2OBJTYP_ERROR;
-	if (in_array($m[1],array("Locale","Editor","SongInfo","PgSetup","Font","PgMargins"))) return NWC2OBJTYP_FILEPROPERTY;
-	if (in_array($m[1],array("AddStaff","StaffProperties","StaffInstrument"))) return NWC2OBJTYP_STAFFPROPERTY;
-	if (preg_match('/^Lyric[s1-8]/',$m[1])) return NWC2OBJTYP_STAFFLYRIC;
+	if (in_array($ObjType,array("Locale","Editor","SongInfo","PgSetup","Font","PgMargins"))) return NWC2OBJTYP_FILEPROPERTY;
+	if (in_array($ObjType,array("AddStaff","StaffProperties","StaffInstrument"))) return NWC2OBJTYP_STAFFPROPERTY;
+	if (preg_match('/^Lyric[s1-8]/',$ObjType)) return NWC2OBJTYP_STAFFLYRIC;
 	return NWC2OBJTYP_STAFFNOTATION;
 }
 
