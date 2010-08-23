@@ -60,27 +60,23 @@ define("NWCTXTLTYP_FORMATHEADER",1);
 define("NWCTXTLTYP_COMMENT",2);
 define("NWCTXTLTYP_OBJECT",3);
 //
-function NWC2ClassifyLine($line)
+function NWC2ClassifyLine($ln)
 {
-	switch ($line[0]) {
+	switch ($ln[0]) {
+		case '|': return NWCTXTLTYP_OBJECT;
 		case '!': return NWCTXTLTYP_FORMATHEADER;
 		case '#': return NWCTXTLTYP_COMMENT;
-		case '|': return NWCTXTLTYP_OBJECT;
 		}
 
 	// Treat empty lines as comments
-	if (!trim($line)) return NWCTXTLTYP_COMMENT;
+	if (!trim($ln)) return NWCTXTLTYP_COMMENT;
 
 	return NWCTXTLTYP_ERROR;
 }
 
 // ----------------------------------------------------------------
 //
-function NWC2GetObjType($line)
-{
-	if (preg_match('/^\\|([A-Za-z0-9]+)/',$line,$m)) return $m[1];
-	return '';
-}
+function NWC2GetObjType($ln)	{return ($ln[0] == '|') ? substr($ln,1,strcspn($ln,"\r\n\t|",1)) : '';}
 
 define("NWC2OBJTYP_ERROR",0);
 define("NWC2OBJTYP_FILEPROPERTY",1);
@@ -91,9 +87,12 @@ define("NWC2OBJTYP_STAFFNOTATION",4);
 function NWC2ClassifyObjType($ObjType)
 {
 	if (!$ObjType) return NWC2OBJTYP_ERROR;
-	if (in_array($ObjType,array("Locale","Editor","SongInfo","PgSetup","Font","PgMargins"))) return NWC2OBJTYP_FILEPROPERTY;
-	if (in_array($ObjType,array("AddStaff","StaffProperties","StaffInstrument"))) return NWC2OBJTYP_STAFFPROPERTY;
-	if (preg_match('/^Lyric[s1-8]/',$ObjType)) return NWC2OBJTYP_STAFFLYRIC;
+	$boundedOTyp = "|$ObjType|";
+	// Speed optimization: Check for most common notation types first using strpos
+	if (strpos("_|Note|Chord|Bar|Rest|Text|Clef|Key|TimeSig|",$boundedOTyp)) return NWC2OBJTYP_STAFFNOTATION;
+	if (strpos("_|Locale|Editor|SongInfo|PgSetup|Font|PgMargins|",$boundedOTyp)) return NWC2OBJTYP_FILEPROPERTY;
+	if (strpos("_|AddStaff|StaffProperties|StaffInstrument|",$boundedOTyp)) return NWC2OBJTYP_STAFFPROPERTY;
+	if (substr($ObjType,0,5) == "Lyric") return NWC2OBJTYP_STAFFLYRIC;
 	return NWC2OBJTYP_STAFFNOTATION;
 }
 
