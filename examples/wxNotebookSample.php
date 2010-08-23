@@ -2,12 +2,12 @@
 require_once("lib/nwc2clips.inc");
 require_once("lib/nwc2gui.inc");
 
-class nwcut_WizardPanel extends wxPanel
+class nwcut_NotebookPage extends wxPanel
 {
 	private $PanelNum = -1;
 	private $Parent;
 
-	function nwcut_WizardPanel($parent,$panelnum)
+	function nwcut_NotebookPage($parent,$panelnum)
 	{
 		parent::__construct($parent);
 
@@ -16,6 +16,7 @@ class nwcut_WizardPanel extends wxPanel
 
 		$panelSizer = new wxBoxSizer(wxVERTICAL);
 		$this->SetSizer($panelSizer);
+		$panelSizer->SetMinSize(300,200);
 		$wxID = wxID_HIGHEST;
 
 		$newrow = new wxBoxSizer(wxHORIZONTAL);
@@ -36,7 +37,7 @@ class nwcut_WizardPanel extends wxPanel
 		for($i=0;$i<$panelnum;$i++) {
 			$wxID++;
 
-			if (($i%10) == 0) {
+			if (($i%6) == 0) {
 				if ($i) $newrow->AddSpacer(10);
 				$newbox = new wxBoxSizer(wxHORIZONTAL);
 				$newrow->Add($newbox,0,wxGROW);
@@ -46,7 +47,7 @@ class nwcut_WizardPanel extends wxPanel
 				}
 
 			$btn = new wxButton($this,$wxID,"Test $wxID",wxDefaultPosition, wxDefaultSize);
-			$newbox->Add($btn);
+			$newbox->Add($btn,0,wxGROW);
 			$this->Connect($wxID,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"doTestBtn"));
 			}
 
@@ -66,42 +67,45 @@ class nwcut_WizardPanel extends wxPanel
 	}
 }
 
-class nwcut_WizardFrame extends wxDialog
+class nwcut_NotebookFrame extends wxDialog
 {
-	private $WizardPanel = false;
-	private $WizardSizer = false;
+	private $NotebookPanel = false;
+	private $NotebookSizer = false;
 	private $CurrentPanel = false;
 	private $PanelNum = 0;
 
-	function nwcut_WizardFrame()
+	function nwcut_NotebookFrame()
 	{
-		parent::__construct(null,-1,"Sample Wizard Interface",wxDefaultPosition,new wxSize(690,400));
+		parent::__construct(null,-1,"Sample Notebook Interface",wxDefaultPosition,new wxSize(690,400));
 	
 		$wxID = wxID_HIGHEST;
 
-		$this->WizardSizer = new wxBoxSizer(wxVERTICAL);
-		$this->SetSizer($this->WizardSizer);
+		$this->NotebookSizer = new wxBoxSizer(wxVERTICAL);
+		$this->SetSizer($this->NotebookSizer);
 
 		$newrow = new wxBoxSizer(wxHORIZONTAL);
-		$this->WizardSizer->Add($newrow, 0, wxGROW);
+		$this->NotebookSizer->Add($newrow,0,wxGROW);
 		//
-		$WizardImgFile = dirname(__FILE__).DIRECTORY_SEPARATOR.'wxSample.bmp';
-		if (file_exists($WizardImgFile)) {
-			$WizardImg = new wxBitmap($WizardImgFile,wxBITMAP_TYPE_BMP);
-			$imgControl = new wxStaticBitmap($this,++$wxID,$WizardImg,wxDefaultPosition,new wxSize(90,300));
-			$newrow->Add($imgControl, 0, wxGROW);
+		$NotebookImgFile = dirname(__FILE__).DIRECTORY_SEPARATOR.'wxSample.bmp';
+		if (file_exists($NotebookImgFile)) {
+			$NotebookImg = new wxBitmap($NotebookImgFile,wxBITMAP_TYPE_BMP);
+			$imgControl = new wxStaticBitmap($this,++$wxID,$NotebookImg,wxDefaultPosition,new wxSize(90,300));
+			$newrow->Add($imgControl,0,wxGROW);
 			}
 
-		// $this->WizardPanel should really be a "wxScrolledWindow" in order to handle size overflow in any created panels. Unfortunately, 
-		// this is not currently available in our wxphp extension.
-		$this->WizardPanel = new wxPanel($this,++$wxID,new wxPoint(0,0),new wxSize(600,300));
-		$newrow->Add($this->WizardPanel);
+		$this->NotebookPanel = new wxNotebook($this,++$wxID,new wxPoint(0,0),wxDefaultSize,wxNB_TOP);
+		$this->AddPanel(1);
+		$this->AddPanel(9);
+		$this->AddPanel(22);
+		$this->AddPanel(32);
+		$this->AddPanel(64);
+		$newrow->Add($this->NotebookPanel,0,wxGROW);
 
 		$ButtonPanel = new wxStaticBoxSizer(wxVERTICAL, $this);
-		$this->WizardSizer->Add($ButtonPanel,0,wxGROW|wxALL,0);
+		$this->NotebookSizer->Add($ButtonPanel,0,wxGROW|wxALL,0);
 		
 		$box = new wxBoxSizer(wxHORIZONTAL);
-		$ButtonPanel->Add($box,0,wxALIGN_RIGHT|wxALL,0);
+		$ButtonPanel->Add($box,0,wxALIGN_RIGHT|wxALL,5);
 
 		$btn_cancel = new wxButton($this, wxID_CANCEL);
 		$box->Add($btn_cancel,0,wxGROW|wxRIGHT,40);
@@ -115,38 +119,35 @@ class nwcut_WizardFrame extends wxDialog
 		$box->Add($btn_next,0,wxGROW);
 		$this->Connect($wxID,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"onNextPanel"));
 
-		$this->WizardSizer->Fit($this);
-
-		$this->CurrentPanel = new nwcut_WizardPanel($this->WizardPanel,1);
+		$this->NotebookSizer->Fit($this);
 	}
 
-	function ChangePanel($i)
+	function AddPanel($i)
 	{
-		if ($i < 0) $i = 99;
-		else if ($i > 99) $i = 0;
-
-		$this->PanelNum = $i;
-
-		if ($this->CurrentPanel) {
-			$this->CurrentPanel->Destroy();
-			$this->CurrentPanel = false;
-			}
-
-		$this->CurrentPanel = new nwcut_WizardPanel($this->WizardPanel,$i+1);
-
-		// In the absence of "wxScrolledWindow" you might need to resize the wizard here, depending on what you
-		// are doing
-		//$this->WizardSizer->Fit($this);
+		$NewPage = new nwcut_NotebookPage($this->NotebookPanel,$i+1);
+		$this->NotebookPanel->AddPage($NewPage,"$i Test Control".(($i == 1) ? '' : "s"));
 	}
 
 	function onPriorPanel()
 	{
-		$this->ChangePanel($this->PanelNum - 1);
+		$n = $this->NotebookPanel->GetSelection();
+		$lastPage = $this->NotebookPanel->GetPageCount() - 1;
+
+		$n--;
+		if ($n < 0) $n = $lastPage;
+
+		$this->NotebookPanel->SetSelection($n);
 	}
 
 	function onNextPanel()
 	{
-		$this->ChangePanel($this->PanelNum + 1);
+		$n = $this->NotebookPanel->GetSelection();
+		$lastPage = $this->NotebookPanel->GetPageCount() - 1;
+
+		$n++;
+		if ($n > $lastPage) $n = 0;
+
+		$this->NotebookPanel->SetSelection($n);
 	}
 
 	function onQuit()
@@ -161,12 +162,9 @@ class nwcut_MainApp extends wxApp
 
 	function OnInit()
 	{
-		$this->AppFrame = new nwcut_WizardFrame();
+		$this->AppFrame = new nwcut_NotebookFrame();
 		$this->AppFrame->Show();
 
-		// In theory, if you want to initiate an action without the user pressing a button, you should probably 
-		// call wxPostEvent here, but this may not be possible in wxphp version
-		
 		return 0;
 	}
 	
