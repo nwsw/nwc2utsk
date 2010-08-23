@@ -519,16 +519,16 @@ foreach ($clip->Items as $item)
 	$oType = $o->GetObjType();
 
 	if (!in_array($oType, array("Note","Chord","Rest","RestChord")))   // not an item of interest, pass it thru
-		echo $item."\n" ;
+		echo $item ;
 	elseif ($gobbleTime > 0)        // run down the gobble clock, don't print the item
 		$gobbleTime -= timeTaken($o) ;   
 	elseif ($passTime > 0)          // run down the pass time clock, DO print item
 	{
 		$passTime -= timeTaken($o) ;
-		echo $item."\n" ;
+		echo $item ;
 	}
 	elseif ($oType == "Rest" || !timeTaken($o))        // don't filter on rests or grace notes
-		echo $item."\n" ;
+		echo $item ;
 	else                             // else filter out the required parts and print modified item
 	{
 		$o =& filterPart($action, $part, $o) ;
