@@ -124,7 +124,7 @@ class nwcut_NotebookFrame extends wxDialog
 
 	function AddPanel($i)
 	{
-		$NewPage = new nwcut_NotebookPage($this->NotebookPanel,$i+1);
+		$NewPage = new nwcut_NotebookPage($this->NotebookPanel,$i);
 		$this->NotebookPanel->AddPage($NewPage,"$i Test Control".(($i == 1) ? '' : "s"));
 	}
 
