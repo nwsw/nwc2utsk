@@ -76,7 +76,7 @@ function NWC2ClassifyLine($ln)
 
 // ----------------------------------------------------------------
 //
-function NWC2GetObjType($ln)	{return ($ln[0] == '|') ? substr($ln,1,strcspn($ln,"\r\n\t|",1)) : '';}
+function NWC2GetObjType($ln)	{return ($ln[0] == '|') ? substr($ln,1,strcspn($ln,"\r\n|\t",1)) : '';}
 
 define("NWC2OBJTYP_ERROR",0);
 define("NWC2OBJTYP_FILEPROPERTY",1);
@@ -89,7 +89,7 @@ function NWC2ClassifyObjType($ObjType)
 	if (!$ObjType) return NWC2OBJTYP_ERROR;
 	$boundedOTyp = "|$ObjType|";
 	// Speed optimization: Check for most common notation types first using strpos
-	if (strpos("_|Note|Chord|Bar|Rest|Text|Clef|Key|TimeSig|",$boundedOTyp)) return NWC2OBJTYP_STAFFNOTATION;
+	if (strpos("_|Note|Chord|Bar|Rest|Text|Dynamic|Clef|Key|TimeSig|",$boundedOTyp)) return NWC2OBJTYP_STAFFNOTATION;
 	if (strpos("_|Locale|Editor|SongInfo|PgSetup|Font|PgMargins|",$boundedOTyp)) return NWC2OBJTYP_FILEPROPERTY;
 	if (strpos("_|AddStaff|StaffProperties|StaffInstrument|",$boundedOTyp)) return NWC2OBJTYP_STAFFPROPERTY;
 	if (substr($ObjType,0,5) == "Lyric") return NWC2OBJTYP_STAFFLYRIC;
@@ -105,13 +105,23 @@ define("NWC2OPT_ASSOCIATIVE",3);
 //
 function NWC2ClassifyOptTag($ObjType,$Tag)
 {
-	if ($ObjType == "SongInfo") return NWC2OPT_TEXT;
-	if (($Tag == "Bar") && ($ObjType == "Context")) return NWC2OPT_LIST;
-	if (in_array($Tag, array("Opts","Dur","Dur2","Endings"))) return NWC2OPT_ASSOCIATIVE;
-	if (($Tag == "Signature") && ($ObjType == "Key")) return NWC2OPT_ASSOCIATIVE;
-	if (in_array($Tag,array("Text","Name","Label","Group","Typeface"))) return NWC2OPT_TEXT;
+	// For speed, classify all possible note tags first
+	$b_Tag = "|$Tag|";
+
+	if (strpos("_|Opts|Dur|Dur2|Endings|",$b_Tag)) return NWC2OPT_ASSOCIATIVE;
+	if (strpos("_|Visibility|Color|",$b_Tag)) return NWC2OPT_RAW;
+
+	if (strpos("_|Pos|Pos2|",$b_Tag)) {
+		if (($ObjType == "Chord") || ($ObjType == "RestChord")) return NWC2OPT_LIST;
+		return NWC2OPT_RAW;
+		}
+
+	if (strpos("_|Text|Name|Label|Group|Typeface|",$b_Tag) || ($ObjType == "SongInfo")) return NWC2OPT_TEXT;
+
 	if ($Tag == "DynVel") return NWC2OPT_LIST;
-	if (in_array($ObjType,array("Chord","RestChord")) && in_array($Tag,array("Pos","Pos2"))) return NWC2OPT_LIST;
+
+	if (($Tag == "Signature") && ($ObjType == "Key")) return NWC2OPT_ASSOCIATIVE;
+	if (($Tag == "Bar") && ($ObjType == "Context")) return NWC2OPT_LIST;
 	return NWC2OPT_RAW;
 }
 
