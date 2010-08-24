@@ -109,12 +109,13 @@ function NWC2ClassifyOptTag($ObjType,$Tag)
 	$b_Tag = "|$Tag|";
 
 	if (strpos("_|Opts|Dur|Dur2|Endings|",$b_Tag)) return NWC2OPT_ASSOCIATIVE;
-	if (strpos("_|Visibility|Color|",$b_Tag)) return NWC2OPT_RAW;
 
 	if (strpos("_|Pos|Pos2|",$b_Tag)) {
 		if (($ObjType == "Chord") || ($ObjType == "RestChord")) return NWC2OPT_LIST;
 		return NWC2OPT_RAW;
 		}
+
+	if (strpos("_|Visibility|Color|",$b_Tag)) return NWC2OPT_RAW;
 
 	if (strpos("_|Text|Name|Label|Group|Typeface|",$b_Tag) || ($ObjType == "SongInfo")) return NWC2OPT_TEXT;
 
