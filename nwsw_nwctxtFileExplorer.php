@@ -67,6 +67,7 @@ class nwcut_MainWindow extends wxDialog
 						$targetLevel = 1;
 						if (!strstr($l,"-End")) {
 							$makeNewLevel = 1;
+							$this->staffIndexes[] = $index + 1;
 							}
 						break;
 					case NWCTXTLTYP_OBJECT:
@@ -195,7 +196,7 @@ class nwcut_MainWindow extends wxDialog
 				"$ObjType Object (Type $ObjClassificationID, ".nw_aafield($ntnTypes,$ObjClassificationID,"NWC2OBJTYP_ERROR").")\n".
 				"\n".print_r($ClipObj,true)."\n";
 
-			if ($ObjClassificationID == NWC2OBJTYP_STAFFNOTATION) {
+			if (($ObjClassificationID == NWC2OBJTYP_STAFFNOTATION) && $this->staffIndexes) {
 				end($this->staffIndexes);
 				while (current($this->staffIndexes) > $linenum) prev($this->staffIndexes);
 				$playIndex = current($this->staffIndexes);
