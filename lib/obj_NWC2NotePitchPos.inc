@@ -3,7 +3,6 @@
 // -----------------------------------------------------------------------
 class NWC2NotePitchPos {
 // -----------------------------------------------------------------------
-
 var $Accidental="";
 var $Position=0;
 var $Notehead="";
@@ -68,6 +67,7 @@ array_walk(NWC2NotePitchPos::$nwcAccidentalOffsets,create_function('&$v,$k','$v-
 // -----------------------------------------------------------------------
 class NWC2ClipItemWithPitchPos extends NWC2ClipItem {
 // -----------------------------------------------------------------------
+static function ObjTypeHasPitchPos($ObjType) {return (strpos("|Note|Chord|RestChord|",$ObjType) !== false);}
 
 var $PitchPos = array("Pos" => array(), "Pos2" => array());
 

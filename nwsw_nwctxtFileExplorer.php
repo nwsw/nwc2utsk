@@ -1,10 +1,14 @@
 <?php
-/*******************************************************************************
-nwsw_FileExplorer.php Version 0.1
-*******************************************************************************/
-define("APPNAME","nwxtxt File Explorer");
+define("APPNAME","nwctxt File Explorer");
 define("APPVERSION","0.1");
-define("USETREECONTROL",false);
+define("APPDESC",
+<<<___EODESC
+This tool shows all of the "File Text (nwctxt)" that is sent from 
+the NoteWorthy Composer User Tool mechanism and the standard
+objects that can be created when using the starter kit library.
+___EODESC
+);
+define("USETREECONTROL",true);
 
 require_once("lib/nwc2clips.inc");
 require_once("lib/nwc2gui.inc");
@@ -13,26 +17,22 @@ $nwctxtLines = gzfile('php://stdin');
 
 class nwcut_MainApp extends wxApp 
 {
-	public $AppFrame = false;
-
 	function OnInit()
 	{
-		$this->AppFrame = new nwcut_MainWindow();
-		$this->AppFrame->Show();
+		$MainFrame = new nwcut_MainWindow();
+		$MainFrame->Show();
 
 		return 0;
 	}
-	
-	function OnExit()
-	{
-		return 0;
-	}
+
+	function OnExit()	{return 0;}
 }
 
 class nwcut_MainWindow extends wxDialog
 {
 	public $ctrl_LineList = false;
 	public $ctrl_Desc = false;
+	public $staffIndexes = array();
 
 	function nwcut_MainWindow()
 	{
@@ -72,6 +72,7 @@ class nwcut_MainWindow extends wxDialog
 					case NWCTXTLTYP_OBJECT:
 						$d = NWC2GetObjType($l);
 						if ($d == "AddStaff") {
+							$this->staffIndexes[] = $index;
 							$targetLevel = 2;
 							$makeNewLevel = 1;
 							}
@@ -123,7 +124,7 @@ class nwcut_MainWindow extends wxDialog
 
 		$newcol = new wxStaticBoxSizer(wxVERTICAL,$this,"Description of input text line");
 		$newrow->Add($newcol, 1, wxGROW);
-		$text = new wxTextCtrl($this, ++$wxID,"Select a line at the left to have it described here",wxDefaultPosition,new wxSize(400,450),wxTE_MULTILINE|wxTE_DONTWRAP|wxTE_NOHIDESEL|wxTE_RICH);
+		$text = new wxTextCtrl($this, ++$wxID,"Select a line at the left to have it described here",wxDefaultPosition,new wxSize(400,450),wxTE_MULTILINE|wxTE_DONTWRAP|wxTE_NOHIDESEL|wxTE_READONLY);
 		$newcol->Add($text,1,wxEXPAND);
 		$this->ctrl_Desc = $text;
 
@@ -131,10 +132,17 @@ class nwcut_MainWindow extends wxDialog
 		$MainSizer->Add($btnrow,0,wxEXPAND);
 
 		$box = new wxBoxSizer(wxHORIZONTAL);
-		$btnrow->Add($box,0,wxALIGN_CENTER|wxALL,10);
+		$btnrow->Add($box,0,wxALIGN_RIGHT|wxALL,5);
+
+		$btn = new wxButton($this,++$wxID,"&About...");
+		$box->Add($btn);
+		$this->Connect($wxID,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"onAbout"));
+
+		$box->AddSpacer(15);
 
 		$btn = new wxButton($this,wxID_CANCEL,"Close");
 		$box->Add($btn);
+
 		$this->Connect(wxID_CANCEL,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"onQuit"));
 
 		$MainSizer->Fit($this);
@@ -181,13 +189,37 @@ class nwcut_MainWindow extends wxDialog
 		if ($lnTypeID == NWCTXTLTYP_OBJECT) {
 			$ObjType = NWC2GetObjType($ln);
 			$ObjClassificationID = NWC2ClassifyObjType($ObjType);
+			$ClipObj = (NWC2ClipItemWithPitchPos::ObjTypeHasPitchPos($ObjType) ? new NWC2ClipItemWithPitchPos($ln) : new NWC2ClipItem($ln));
 
 			$d .= "\n".
 				"$ObjType Object (Type $ObjClassificationID, ".nw_aafield($ntnTypes,$ObjClassificationID,"NWC2OBJTYP_ERROR").")\n".
-				"\n".print_r(new NWC2ClipItem($ln),true)."\n";
+				"\n".print_r($ClipObj,true)."\n";
+
+			if ($ObjClassificationID == NWC2OBJTYP_STAFFNOTATION) {
+				end($this->staffIndexes);
+				while (current($this->staffIndexes) > $linenum) prev($this->staffIndexes);
+				$playIndex = current($this->staffIndexes);
+				$PlayContext = new NWC2PlayContext();
+				while ($playIndex < $linenum) {
+					$o = new NWC2ClipItemWithPitchPos($nwctxtLines[$playIndex++]);
+					$PlayContext->UpdateContext($o);
+					}
+
+				$d .= "\n".print_r($PlayContext,true)."\n";
+				}
 			}
 
 		$this->ctrl_Desc->SetValue($d);
+	}
+
+	function onAbout()
+	{
+		$dlg = new wxMessageDialog($this,
+			APPNAME." (Version ".APPVERSION.")\n\n".
+			APPDESC."\n\n".
+			"It is currently using a ".(USETREECONTROL ? "tree" : "listbox")." control to show nwctxt lines.",
+			"About",wxICON_INFORMATION);
+		$dlg->ShowModal();
 	}
 
 	function onQuit()
@@ -198,7 +230,8 @@ class nwcut_MainWindow extends wxDialog
 
 function nwcut_InitWX()
 {
-	// This init function is designed to protect the $App variable from the global scope, which prevents problems during Destroy
+	// This init function is designed to protect the $App variable from the global scope.
+	// This prevents some problems that can arise during Destroy.
 	$App = new nwcut_MainApp();
 	wxApp::SetInstance($App);
 	wxEntry();
