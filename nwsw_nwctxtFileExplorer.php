@@ -87,7 +87,6 @@ class nwcut_MainWindow extends wxDialog
 				while (count($treeBranch) > $targetLevel) array_pop($treeBranch);
 				$newnode = $tree->AppendItem(end($treeBranch),"$d  ^".($index+1)."");
 				if ($makeNewLevel > 0) $treeBranch[] = $newnode;
-				else if ($makeNewLevel < 0) array_pop($treeBranch);
 				}
 			$tree->Expand($treeRoot);
 			$newcol->Add($tree,1,wxEXPAND);
@@ -97,11 +96,12 @@ class nwcut_MainWindow extends wxDialog
 			$newcol->Add($label);
 
 			$lb_list = new wxArrayString();
-			foreach ($nwctxtLines as $l) {
+			foreach ($nwctxtLines as $index => $l) {
 				$d = "--Error--";
 				switch(NWC2ClassifyLine($l)) {
 					case NWCTXTLTYP_OBJECT:
 						$d = NWC2GetObjType($l);
+						if ($d == "AddStaff") $this->staffIndexes[] = $index;
 						break;
 					case NWCTXTLTYP_FORMATHEADER:
 						$d = trim($l);
