@@ -106,6 +106,9 @@ class nwcut_MainWindow extends wxDialog
 						break;
 					case NWCTXTLTYP_FORMATHEADER:
 						$d = trim($l);
+						if (!strstr($l,"-End")) {
+							$this->staffIndexes[] = $index + 1;
+							}
 						break;
 					case NWCTXTLTYP_COMMENT:
 						$d = "#Comment";
