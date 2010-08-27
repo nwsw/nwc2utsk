@@ -8,7 +8,7 @@ the NoteWorthy Composer User Tool mechanism and the standard
 objects that can be created when using the starter kit library.
 ___EODESC
 );
-define("USETREECONTROL",true);
+define("USETREECONTROL",false);
 
 require_once("lib/nwc2clips.inc");
 require_once("lib/nwc2gui.inc");
@@ -166,7 +166,7 @@ class nwcut_MainWindow extends wxDialog
 
 	function doShowLineDesc($evt)
 	{
-		$this->ShowDesc($evt->GetSelection());
+		$this->ShowDesc($this->ctrl_LineList->GetSelection());
 	}
 
 	function ShowDesc($linenum)

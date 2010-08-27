@@ -36,6 +36,10 @@ class nwcut_MainWindow extends wxDialog
 		parent::__construct(null,-1,APPNAME,wxDefaultPosition,new wxSize(620,500));
 
 		$this->ClassList = get_declared_classes();
+		//
+		// Remove our GUI classes
+		while (strstr(end($this->ClassList),'nwcut_')) array_pop($this->ClassList);
+		//
 		sort($this->ClassList);
 	
 		$wxID = wxID_HIGHEST;
@@ -131,7 +135,7 @@ class nwcut_MainWindow extends wxDialog
 function nwcut_InitWX()
 {
 	// This init function is designed to protect the $App variable from the global scope.
-	// This prevents some problems that can arise during Destroy.
+	// This prevents some scope problems that can arise during Destroy.
 	$App = new nwcut_MainApp();
 	wxApp::SetInstance($App);
 	wxEntry();
