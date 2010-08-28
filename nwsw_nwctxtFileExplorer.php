@@ -8,7 +8,7 @@ the NoteWorthy Composer User Tool mechanism and the standard
 objects that can be created when using the starter kit library.
 ___EODESC
 );
-define("USETREECONTROL",false);
+define("USETREECONTROL",true);
 
 require_once("lib/nwc2clips.inc");
 require_once("lib/nwc2gui.inc");
