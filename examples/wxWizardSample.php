@@ -2,17 +2,19 @@
 require_once("lib/nwc2clips.inc");
 require_once("lib/nwc2gui.inc");
 
-class nwcut_WizardPanel extends wxPanel
+class nwcut_WizardPanel extends wxScrolledWindow
 {
 	private $PanelNum = -1;
 	private $Parent;
+	private $NumberBox;
 
-	function nwcut_WizardPanel($parent,$panelnum)
+	function nwcut_WizardPanel($parent,$panelnum,$sz)
 	{
-		parent::__construct($parent);
+		parent::__construct($parent,-1,wxDefaultPosition,$sz);
 
 		$this->Parent = $parent;
 		$this->PanelNum = $panelnum;
+		$this->SetScrollRate(1,1);
 
 		$panelSizer = new wxBoxSizer(wxVERTICAL);
 		$this->SetSizer($panelSizer);
@@ -22,13 +24,23 @@ class nwcut_WizardPanel extends wxPanel
 		$panelSizer->Add($newrow,0,wxGROW|wxALL,10);
 
 		$statictext = new wxStaticText($this, ++$wxID, "This is panel $panelnum");
-		$newrow->Add($statictext,0,wxGROW);
+		$newrow->Add($statictext);
 		//
 		$newrow->AddSpacer(15);
 		//
 		$btn = new wxButton($this,++$wxID,"About Panel $panelnum");
-		$newrow->Add($btn,0,wxGROW);
+		$newrow->Add($btn);
 		$this->Connect($wxID,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"onAbout"));
+
+		$newrow->AddSpacer(10);
+
+		$this->NumberBox = new wxTextCtrl($this,++$wxID,"100");
+		$newrow->Add($this->NumberBox,0,wxGROW);
+		$newrow->AddSpacer(3);
+		$btn = new wxSpinButton($this,++$wxID,wxDefaultPosition,new wxSize(-1,10));
+		$newrow->Add($btn,0,wxGROW);
+		$this->Connect($wxID,wxEVT_SCROLL_LINEUP,array($this,"onSpinUp"));
+		$this->Connect($wxID,wxEVT_SCROLL_LINEDOWN,array($this,"onSpinDown"));
 
 		$newrow = new wxStaticBoxSizer(wxVERTICAL,$this);
 		$panelSizer->Add($newrow,0,wxGROW|wxALL,10);
@@ -50,7 +62,7 @@ class nwcut_WizardPanel extends wxPanel
 			$this->Connect($wxID,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"doTestBtn"));
 			}
 
-		$panelSizer->Fit($this);
+		$panelSizer->FitInside($this);
 	}
 
 	function doTestBtn($event)
@@ -63,6 +75,16 @@ class nwcut_WizardPanel extends wxPanel
 	{
 		$dlg = new wxMessageDialog($this->Parent,"Panel {$this->PanelNum} About Box","About box...",wxICON_INFORMATION);
 		$dlg->ShowModal();
+	}
+
+	function onSpinDown($event)
+	{
+		$this->NumberBox->SetValue(intval($this->NumberBox->GetValue()) - 1);
+	}
+
+	function onSpinUp($event)
+	{
+		$this->NumberBox->SetValue(intval($this->NumberBox->GetValue()) + 1);
 	}
 }
 
@@ -92,8 +114,6 @@ class nwcut_WizardFrame extends wxDialog
 			$newrow->Add($imgControl, 0, wxGROW);
 			}
 
-		// $this->WizardPanel should really be a "wxScrolledWindow" in order to handle size overflow in any created panels. Unfortunately, 
-		// this is not currently available in our wxphp extension.
 		$this->WizardPanel = new wxPanel($this,++$wxID,new wxPoint(0,0),new wxSize(600,300));
 		$newrow->Add($this->WizardPanel);
 
@@ -117,7 +137,7 @@ class nwcut_WizardFrame extends wxDialog
 
 		$this->WizardSizer->Fit($this);
 
-		$this->CurrentPanel = new nwcut_WizardPanel($this->WizardPanel,1);
+		$this->CurrentPanel = new nwcut_WizardPanel($this->WizardPanel,1,new wxSize(600,300));
 	}
 
 	function ChangePanel($i)
@@ -132,7 +152,7 @@ class nwcut_WizardFrame extends wxDialog
 			$this->CurrentPanel = false;
 			}
 
-		$this->CurrentPanel = new nwcut_WizardPanel($this->WizardPanel,$i+1);
+		$this->CurrentPanel = new nwcut_WizardPanel($this->WizardPanel,$i+1,new wxSize(600,300));
 
 		// In the absence of "wxScrolledWindow" you might need to resize the wizard here, depending on what you
 		// are doing
