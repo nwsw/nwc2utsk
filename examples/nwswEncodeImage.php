@@ -65,17 +65,12 @@ class nwcut_MainWindow extends wxDialog
 		$newrow->Add($label);
 		$newrow->AddSpacer(5);
 		//
-		$this->ctrl_MaxLineLength = new wxTextCtrl($this,++$wxID,"1024");
+		$this->ctrl_MaxLineLength = new wxSpinCtrl($this,++$wxID,"",wxDefaultPosition,wxDefaultSize,wxSP_ARROW_KEYS,32,32000,512);
 		$newrow->Add($this->ctrl_MaxLineLength);
-		$newrow->AddSpacer(3);
-		$btn = new wxSpinButton($this,++$wxID,wxDefaultPosition,new wxSize(-1,10));
-		$newrow->Add($btn,0,wxGROW);
-		$this->Connect($wxID,wxEVT_SCROLL_LINEUP,array($this,"onSpinUp"));
-		$this->Connect($wxID,wxEVT_SCROLL_LINEDOWN,array($this,"onSpinDown"));
 
 		$ControlPanel->AddSpacer(5);
 
-		$text = new wxTextCtrl($this, ++$wxID,"Select an image, and code to embed it ina script will be shown here",wxDefaultPosition,new wxSize(400,250),wxTE_MULTILINE|wxTE_DONTWRAP|wxTE_NOHIDESEL|wxTE_READONLY);
+		$text = new wxTextCtrl($this, ++$wxID,"Select an image, then a code snippet for embedding it will be shown here",wxDefaultPosition,new wxSize(400,250),wxTE_MULTILINE|wxTE_DONTWRAP|wxTE_NOHIDESEL|wxTE_READONLY);
 		$ControlPanel->Add($text,1,wxGROW);
 		$this->ctrl_ImgEmbedText = $text;
 
@@ -106,16 +101,6 @@ class nwcut_MainWindow extends wxDialog
 			$script = BuildConvScript($pngConv,intval($this->ctrl_MaxLineLength->GetValue()));
 			$this->ctrl_ImgEmbedText->SetValue($script);
 			}
-	}
-
-	function onSpinDown($event)
-	{
-		$this->ctrl_MaxLineLength->SetValue(intval($this->ctrl_MaxLineLength->GetValue()) - 1);
-	}
-
-	function onSpinUp($event)
-	{
-		$this->ctrl_MaxLineLength->SetValue(intval($this->ctrl_MaxLineLength->GetValue()) + 1);
 	}
 
 	function onAbout()
