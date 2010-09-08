@@ -4,6 +4,8 @@ require_once("lib/nwc2gui.inc");
 
 class nwcut_MainWindow extends wxDialog
 {
+	var $ctrl_rb = false;
+
 	function nwcut_MainWindow()
 	{
 		parent::__construct(null,-1,"Basic Sample Interface",wxDefaultPosition,wxDefaultPosition);
@@ -25,6 +27,12 @@ class nwcut_MainWindow extends wxDialog
 		$box = new wxBoxSizer(wxHORIZONTAL);
 		$ButtonPanel->Add($box,0,wxALIGN_RIGHT|wxALL,0);
 
+		$ctrl_rb = new wxRadioButton($this, ++$wxID, "RadioBtn Test");
+		$box->Add($ctrl_rb,0,wxGROW);
+		$this->ctrl_rb = $ctrl_rb;
+
+		$box->AddSpacer(20);
+
 		$btn_test = new wxButton($this, ++$wxID, "Test");
 		$box->Add($btn_test,0,wxGROW);
 		$this->Connect($wxID,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"onTest"));
@@ -40,17 +48,9 @@ class nwcut_MainWindow extends wxDialog
 
 	function onTest()
 	{
-		$redirs = array(array("file", "php://stdin", "r"),
-				array("file", "php://stdout", "w"),
-				array("file", "php://stderr", "w"));
-		//$redirs = array();
-
-		$bypshell = array("bypass_shell" => true);
-		//$bypshell = array();
-
-
-		$process = proc_open('X:\Dev-bc\BIN\php\php.exe Scripts\nwsw_About.php', $redirs, $sink, null, null, $bypshell);
-		$exitcode = proc_close($process);
+		$msg = "RadioButton Label is: ".$this->ctrl_rb->GetLabel();
+		$dlg = new wxMessageDialog($this,$msg,"Testing...",wxICON_INFORMATION);
+		$dlg->ShowModal();
 	}
 
 	function onQuit()

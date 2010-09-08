@@ -55,6 +55,7 @@ class nwcut_MainWindow extends wxDialog
 			$this->Connect($wxID, wxEVT_COMMAND_TREE_SEL_CHANGED, array($this, "doTreeSelect"));
 			$this->ctrl_LineList = $tree;
 			$treeRoot = $tree->AddRoot("nwctxt Input");
+			$tree->SetItemPHPData($treeRoot,-1);
 			$treeBranch[] = $treeRoot;
 			foreach ($nwctxtLines as $index => $l) {
 				$d = "--Error--";
@@ -86,7 +87,9 @@ class nwcut_MainWindow extends wxDialog
 					}
 
 				while (count($treeBranch) > $targetLevel) array_pop($treeBranch);
-				$newnode = $tree->AppendItem(end($treeBranch),"$d  ^".($index+1)."");
+				$newnode = $tree->AppendItem(end($treeBranch),$d);
+				$tree->SetItemPHPData($newnode,$index);
+
 				if ($makeNewLevel > 0) $treeBranch[] = $newnode;
 				}
 			$tree->Expand($treeRoot);
@@ -154,13 +157,7 @@ class nwcut_MainWindow extends wxDialog
 
 	function doTreeSelect($evt)
 	{
-		$linenum = -1;
-		$lbl = $this->ctrl_LineList->GetItemText($evt->GetItem());
-		$indexStart = strrpos($lbl,'^');
-		if ($indexStart !== false) {
-			$linenum = intval(substr($lbl,$indexStart+1)) - 1;
-			}
-
+		$linenum = $this->ctrl_LineList->GetItemPHPData($evt->GetItem());
 		$this->ShowDesc($linenum);
 	}
 
@@ -187,6 +184,8 @@ class nwcut_MainWindow extends wxDialog
 
 		$lnTypeID = NWC2ClassifyLine($ln);
 		$lnType = nw_aafield($lnTypes,$lnTypeID,"NWCTXTLTYP_ERROR");
+
+		$linenum++;
 
 		$d = "Line $linenum (Type $lnTypeID, $lnType)\n\n$ln\n";
 

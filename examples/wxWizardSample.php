@@ -99,6 +99,8 @@ class nwcut_WizardFrame extends wxDialog
 	{
 		parent::__construct(null,-1,"Sample Wizard Interface",wxDefaultPosition,new wxSize(690,400));
 	
+		//$this->SetIcon(new wxIcon(dirname(__FILE__).DIRECTORY_SEPARATOR.'wxIcon.ico',wxBITMAP_TYPE_ICO ));
+
 		$wxID = wxID_HIGHEST;
 
 		$this->WizardSizer = new wxBoxSizer(wxVERTICAL);
@@ -107,12 +109,17 @@ class nwcut_WizardFrame extends wxDialog
 		$newrow = new wxBoxSizer(wxHORIZONTAL);
 		$this->WizardSizer->Add($newrow, 0, wxGROW);
 		//
-		$WizardImgFile = dirname(__FILE__).DIRECTORY_SEPARATOR.'wxSample.bmp';
-		if (file_exists($WizardImgFile)) {
-			$WizardImg = new wxBitmap($WizardImgFile,wxBITMAP_TYPE_BMP);
-			$imgControl = new wxStaticBitmap($this,++$wxID,$WizardImg,wxDefaultPosition,new wxSize(90,300));
-			$newrow->Add($imgControl, 0, wxGROW);
-			}
+		// Image embed code created by nwswEncodeImage.php
+		$tmpfile_PNG = tempnam("", "nwcut");
+		$pngData =
+			'iVBORw0KGgoAAAANSUhEUgAAAFoAAAJYAQMAAADYMWNjAAAAB3RJTUUH2gkHDA0hH2tYVgAAAAlwSFlzAAAPYAAAD2ABenhFjQAAAAZQTFRFAAD/////e9yZLAAAAnNJREFUeNrtlkFu2zAQRSlwwSwCc9tFEF6jiwLKUXSELruTj6aiF1HRC2ipAIKYkWySj7ZlOEnRBCj/QsiDJ8OZ4XBIpYqKioqKior+A1UjwfeHP+wknzbAYuICdNZ3NsBewARQ1az0EXZKTapK8GMTvir1V6G6DTTDifn4RR8KywexqRj1/frNoDnA3Tk8vakXorTfg0Jsq1qCI1iCIWhC9QZQr4O7s1JVl2B3BiHQT9AH15si74MMGtYgg1fKDoB6ArQe4NErlfddBH0CaaeM98NlsCeQhpOdHKDXgE4BluMM+BZhdwIPJ9BsQir8lxyygWL6GPWna5ePmCHR2wXotyA79SGFNRwL0CHT+7XlErAG7T8r/ICxMcYUrJ9ScnZG'.
+			'DczEgmSjtmb+hmeu4pnL7ey4add2W3Z63rSrB7qDneFZr3miPUCskplYTbQaLlo5j2VoJWMjDRFLq3w4cNQIIGdYCfQEloZbcvglwrJmH11PCSSFMR0z69mJjiC9eIS1lTNgX1+5KPMj09wGN+pGb5uxZVEbQvY+YPE1wRHYVdml4bb6TRMcAef00El9sppjPmu/NfTV0NdThGeu8hMwV4CR0AFmVM2OAO1Zz7YHWHgTO5a9/Q2wzwCdol79YRtlXfrjnrZ/6G9zs648AA3h/a38TjHOKk4B2QUdJ5KAiSPFTZgc8vZxcT7JA6OOA8bul5slgHTPbABxHjzKmkNI+0HWHBSgT2DE10D4HsDK+hGcRJZBE6CeY0UfVZsBZpVaKhDg13JNHaNen1/6COuBMwm6JfdjBSUa14XaelwZ8jRMHWLk/7N2KSoqKioqKiq6qBf9GY3z04RqJgAAAABJRU5ErkJggg==';
+		file_put_contents($tmpfile_PNG,base64_decode($pngData));
+		$my_bitmap = new wxBitmap($tmpfile_PNG,wxBITMAP_TYPE_PNG);
+		unlink($tmpfile_PNG);
+		//
+		$imgControl = new wxStaticBitmap($this,++$wxID,$my_bitmap);
+		$newrow->Add($imgControl, 0, wxGROW);
 
 		$this->WizardPanel = new wxPanel($this,++$wxID,new wxPoint(0,0),new wxSize(600,300));
 		$newrow->Add($this->WizardPanel);
