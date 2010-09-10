@@ -20,23 +20,23 @@ function BuildEncodedDataString($pngConv,$maxl)
 		$s .= addslashes($ln);
 		}
 
-	return "\t'".$s."';";
+	return "\t'".$s."'";
 }
 
-function BuildConvScript($pngConv,$maxl)
+function BuildConvScript($fname,$pngConv,$maxl)
 {
 	return
-		'// The following code can be used to embed this image'.PHP_EOL.PHP_EOL.
-		'//Image embed code created by nwswEncodeImage.php'.PHP_EOL.
-		'$tmpfile_PNG = tempnam("", "nwcut");'.PHP_EOL.
-		'$pngData ='.PHP_EOL.BuildEncodedDataString($pngConv,max($maxl,16)).PHP_EOL.
-		'file_put_contents($tmpfile_PNG,base64_decode($pngData));'.PHP_EOL.
-		'$my_bitmap = new wxBitmap($tmpfile_PNG,wxBITMAP_TYPE_PNG);'.PHP_EOL.
-		'unlink($tmpfile_PNG);'.PHP_EOL;
+		'// The following code can be used to embed this image ('.$fname.')'.PHP_EOL.PHP_EOL.
+		'// Embedded image code created by nwswEncodeImage.php'.PHP_EOL.
+		'$pngData = base64_decode('.PHP_EOL.
+		BuildEncodedDataString($pngConv,max($maxl,16)).PHP_EOL.
+		"\t);".PHP_EOL.
+		'$my_bitmap = new wxBitmap(new wxImage(new wxMemoryInputStream($pngData,strlen($pngData)),wxBITMAP_TYPE_PNG));'.PHP_EOL;
 }
 
 class nwcut_MainWindow extends wxDialog
 {
+	var $ctrl_FileNameText = false;
 	var $ctrl_ImgEmbedText = false;
 	var $ctrl_MaxLineLength = false;
 
@@ -52,9 +52,16 @@ class nwcut_MainWindow extends wxDialog
 		$ControlPanel = new wxBoxSizer(wxVERTICAL);
 		$MainSizer->Add($ControlPanel,0,wxGROW|wxALL,20);
 
+		$newrow = new wxBoxSizer(wxHORIZONTAL);
+		$ControlPanel->Add($newrow);
+		//
 		$btn = new wxButton($this, ++$wxID, "Select Image");
-		$ControlPanel->Add($btn);
+		$newrow->Add($btn,0,wxALIGN_CENTER);
 		$this->Connect($wxID,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"onSelectImage"));
+		$newrow->AddSpacer(5);
+		$label = new wxStaticText($this, ++$wxID, "<image filename>");
+		$newrow->Add($label,0,wxALIGN_CENTER);
+		$this->ctrl_FileNameText = $label;
 
 		$ControlPanel->AddSpacer(5);
 
@@ -62,11 +69,12 @@ class nwcut_MainWindow extends wxDialog
 		$ControlPanel->Add($newrow);
 		//
 		$label = new wxStaticText($this, ++$wxID, "Maximum Encode Line Length:");
-		$newrow->Add($label);
+		$newrow->Add($label,0,wxALIGN_CENTER);
 		$newrow->AddSpacer(5);
 		//
 		$this->ctrl_MaxLineLength = new wxSpinCtrl($this,++$wxID,"",wxDefaultPosition,wxDefaultSize,wxSP_ARROW_KEYS,32,32000,512);
-		$newrow->Add($this->ctrl_MaxLineLength);
+		$newrow->Add($this->ctrl_MaxLineLength,0,wxALIGN_CENTER);
+		$this->Connect($wxID,wxEVT_COMMAND_TEXT_UPDATED,array($this,"onUpdateCode"));
 
 		$ControlPanel->AddSpacer(5);
 
@@ -97,10 +105,18 @@ class nwcut_MainWindow extends wxDialog
 	{
 		$dlg = new wxFileDialog($this,"Choose an image file",dirname(__FILE__),"","PNG Image File (*.png)|*.png");
 		if ($dlg->ShowModal() == wxID_OK) {
-			$pngConv = base64_encode(file_get_contents($dlg->GetPath()));
-			$script = BuildConvScript($pngConv,intval($this->ctrl_MaxLineLength->GetValue()));
-			$this->ctrl_ImgEmbedText->SetValue($script);
+			$this->ctrl_FileNameText->SetLabel($dlg->GetPath());
+			$this->onUpdateCode();
 			}
+	}
+
+	function onUpdateCode()
+	{
+		$fname = $this->ctrl_FileNameText->GetLabel();
+		if (!file_exists($fname)) return;
+		$pngConv = base64_encode(file_get_contents($fname));
+		$script = BuildConvScript($fname,$pngConv,intval($this->ctrl_MaxLineLength->GetValue()));
+		$this->ctrl_ImgEmbedText->SetValue($script);
 	}
 
 	function onAbout()
