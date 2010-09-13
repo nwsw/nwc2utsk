@@ -47,11 +47,15 @@ class nwc2gui_IconBundle extends wxIconBundle
 	{
 		if (is_string($iconData)) parent::__construct($iconData,$imgtype);
 		else {
-			if (!is_array($iconData)) $iconData = array("data" => MSTREAM_WXPHP_ICO, 'opts' => array('gz','base64'));
-
 			parent::__construct();
 
-			$mstream = new nwc2gui_MemoryInStream($iconData['data'],$iconData['opts']);
+			if (is_object($iconData)) {
+				$mstream = $iconData;
+				}
+			else {
+				if (!is_array($iconData)) $iconData = array("data" => MSTREAM_WXPHP_ICO, 'opts' => array('gz','base64'));
+				$mstream = new nwc2gui_MemoryInStream($iconData['data'],$iconData['opts']);
+				}
 
 			$img = new wxImage();
 			$n = $img->GetImageCount($mstream,$imgtype);
