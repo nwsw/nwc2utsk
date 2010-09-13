@@ -1,41 +1,62 @@
 <?php
-define("APPNAME","nwsw Image Embed Encoder");
+define("APPNAME","nwswEncodeFile");
 define("APPVERSION","1.0");
 define("APPDESC",
 <<<___EODESC
-This tool shows you how to embed a *.png image into your script.
+This tool assists with inlining a file, such as an icon or other image, directly into your script.
 ___EODESC
 );
 
 require_once("lib/nwc2clips.inc");
 require_once("lib/nwc2gui.inc");
 
-function BuildEncodedDataString($pngConv,$maxl)
+function EncodeFile($fname)
 {
-	$a = str_split($pngConv,$maxl);
+	$name = preg_replace('/[^a-zA-Z0-9]+/','_',pathinfo($fname,PATHINFO_BASENAME|PATHINFO_EXTENSION));
+	$data = file_get_contents($fname);
+	$opts = array();
+
+	$gzdata = gzcompress($data);
+	if ((strlen($gzdata)+10) < strlen($data)) {
+		$opts[] = "gz";
+		$data = $gzdata;
+		}
+
+	$opts[] = "base64";
+
+	return array(
+		"data" => base64_encode($data),
+		"opts" => $opts,
+		"name" => $name,
+		"id"   => 'MSTREAM_'.strtoupper($name)
+		);
+}
+
+function BuildEncodedDataDefine($data,$maxl,$quoteChar="'",$newLinePrefix="\t")
+{
+	$a = str_split($data['data'],$maxl);
 	$s = "";
 	// Use a loop so that we can addslashes, in case the choice of encoding includes quotes
 	foreach ($a as $ln) {
-		if ($s) $s .= "'.".PHP_EOL."\t'";
-		$s .= addslashes($ln);
+		if ($s) $s .= $quoteChar.".".PHP_EOL.$newLinePrefix.$quoteChar;
+		$s .= addcslashes($ln,$quoteChar);
 		}
 
-	return "\t'".$s."'";
+	return "define('$data[id]','$s');";
 }
 
-function BuildConvScript($fname,$pngConv,$maxl)
+function BuildConvScript($fname,$data,$maxl)
 {
 	return
-		'// The following code can be used to embed this image ('.$fname.')'.PHP_EOL.PHP_EOL.
-		'// Embedded image code created by nwswEncodeImage.php'.PHP_EOL.
-		'$pngData = base64_decode('.PHP_EOL.
-		BuildEncodedDataString($pngConv,max($maxl,16)).PHP_EOL.
-		"\t);".PHP_EOL.
-		'$my_bitmap = new wxBitmap(new wxImage(new wxMemoryInputStream($pngData,strlen($pngData)),wxBITMAP_TYPE_PNG));'.PHP_EOL;
+		'// The following code can be used to embed this file ('.$fname.')'.PHP_EOL.PHP_EOL.
+		'// Embedded file code created by nwswEncodeFile.php'.PHP_EOL.
+		BuildEncodedDataDefine($data,max($maxl,16),"'","\t").PHP_EOL.
+		"\$$data[name] = new nwc2gui_MemoryInStream($data[id],array('".implode("','",$data["opts"])."'));".PHP_EOL;
 }
 
 class nwcut_MainWindow extends wxDialog
 {
+	var $Data = false;
 	var $ctrl_FileNameText = false;
 	var $ctrl_ImgEmbedText = false;
 	var $ctrl_MaxLineLength = false;
@@ -44,6 +65,8 @@ class nwcut_MainWindow extends wxDialog
 	{
 		parent::__construct(null,-1,APPNAME,wxDefaultPosition,wxDefaultPosition);
 	
+		$this->SetIcons(new nwc2gui_IconBundle);
+
 		$wxID = wxID_HIGHEST;
 
 		$MainSizer = new wxBoxSizer(wxVERTICAL);
@@ -55,11 +78,11 @@ class nwcut_MainWindow extends wxDialog
 		$newrow = new wxBoxSizer(wxHORIZONTAL);
 		$ControlPanel->Add($newrow);
 		//
-		$btn = new wxButton($this, ++$wxID, "Select Image");
+		$btn = new wxButton($this, ++$wxID, "Select File");
 		$newrow->Add($btn,0,wxALIGN_CENTER);
-		$this->Connect($wxID,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"onSelectImage"));
+		$this->Connect($wxID,wxEVT_COMMAND_BUTTON_CLICKED,array($this,"onSelectFile"));
 		$newrow->AddSpacer(5);
-		$label = new wxStaticText($this, ++$wxID, "<image filename>");
+		$label = new wxStaticText($this, ++$wxID, "<filename>");
 		$newrow->Add($label,0,wxALIGN_CENTER);
 		$this->ctrl_FileNameText = $label;
 
@@ -78,7 +101,7 @@ class nwcut_MainWindow extends wxDialog
 
 		$ControlPanel->AddSpacer(5);
 
-		$text = new wxTextCtrl($this, ++$wxID,"Select an image, then a code snippet for embedding it will be shown here",wxDefaultPosition,new wxSize(400,250),wxTE_MULTILINE|wxTE_DONTWRAP|wxTE_NOHIDESEL|wxTE_READONLY);
+		$text = new wxTextCtrl($this, ++$wxID,"Select a file, then a code snippet for inline streaming will be shown here",wxDefaultPosition,new wxSize(400,250),wxTE_MULTILINE|wxTE_DONTWRAP|wxTE_NOHIDESEL|wxTE_READONLY);
 		$ControlPanel->Add($text,1,wxGROW);
 		$this->ctrl_ImgEmbedText = $text;
 
@@ -101,22 +124,22 @@ class nwcut_MainWindow extends wxDialog
 		$MainSizer->Fit($this);
 	}
 
-	function onSelectImage()
+	function onSelectFile()
 	{
-		$dlg = new wxFileDialog($this,"Choose an image file",dirname(__FILE__),"","PNG Image File (*.png)|*.png");
+		$dlg = new wxFileDialog($this,"Choose a File",dirname(__FILE__),"","Image Files|*.png;*.ico;*.bmp;*.jpg|All Files|*.*");
 		if ($dlg->ShowModal() == wxID_OK) {
 			$this->ctrl_FileNameText->SetLabel($dlg->GetPath());
+			$this->Data = EncodeFile($dlg->GetPath());
 			$this->onUpdateCode();
 			}
 	}
 
 	function onUpdateCode()
 	{
-		$fname = $this->ctrl_FileNameText->GetLabel();
-		if (!file_exists($fname)) return;
-		$pngConv = base64_encode(file_get_contents($fname));
-		$script = BuildConvScript($fname,$pngConv,intval($this->ctrl_MaxLineLength->GetValue()));
-		$this->ctrl_ImgEmbedText->SetValue($script);
+		if ($this->Data) {
+			$script = BuildConvScript($this->ctrl_FileNameText->GetLabel(),$this->Data,intval($this->ctrl_MaxLineLength->GetValue()));
+			$this->ctrl_ImgEmbedText->SetValue($script);
+			}
 	}
 
 	function onAbout()

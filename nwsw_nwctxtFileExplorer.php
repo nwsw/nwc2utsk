@@ -34,11 +34,13 @@ class nwcut_MainWindow extends wxDialog
 	public $ctrl_Desc = false;
 	public $staffIndexes = array();
 
-	function nwcut_MainWindow()
+	function __construct()
 	{
 		global $nwctxtLines;
 		parent::__construct(null,-1,APPNAME,wxDefaultPosition,new wxSize(620,500));
 	
+		$this->SetIcons(new nwc2gui_IconBundle);
+
 		$wxID = wxID_HIGHEST;
 
 		$MainSizer = new wxBoxSizer(wxVERTICAL);
@@ -233,8 +235,6 @@ class nwcut_MainWindow extends wxDialog
 
 function nwcut_InitWX()
 {
-	// This init function is designed to protect the $App variable from the global scope.
-	// This prevents some problems that can arise during Destroy.
 	$App = new nwcut_MainApp();
 	wxApp::SetInstance($App);
 	wxEntry();

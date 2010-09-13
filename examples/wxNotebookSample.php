@@ -78,6 +78,8 @@ class nwcut_NotebookFrame extends wxDialog
 	{
 		parent::__construct(null,-1,"Sample Notebook Interface",wxDefaultPosition,new wxSize(690,400));
 	
+		$this->SetIcons(new nwc2gui_IconBundle);
+
 		$wxID = wxID_HIGHEST;
 
 		$this->NotebookSizer = new wxBoxSizer(wxVERTICAL);
@@ -86,13 +88,17 @@ class nwcut_NotebookFrame extends wxDialog
 		$newrow = new wxBoxSizer(wxHORIZONTAL);
 		$this->NotebookSizer->Add($newrow,0,wxGROW);
 		//
-		// Image embed code created by nwswEncodeImage.php
-		// Image embed code created by nwswEncodeImage.php
-		$pngData = base64_decode(
-			'iVBORw0KGgoAAAANSUhEUgAAAFoAAAJYAQMAAADYMWNjAAAAB3RJTUUH2gkHDA0hH2tYVgAAAAlwSFlzAAAPYAAAD2ABenhFjQAAAAZQTFRFAAD/////e9yZLAAAAnNJREFUeNrtlkFu2zAQRSlwwSwCc9tFEF6jiwLKUXSELruTj6aiF1HRC2ipAIKYkWySj7ZlOEnRBCj/QsiDJ8OZ4XBIpYqKioqKior+A1UjwfeHP+wknzbAYuICdNZ3NsBewARQ1az0EXZKTapK8GMTvir1V6G6DTTDifn4RR8KywexqRj1/frNoDnA3Tk8vakXorTfg0Jsq1qCI1iCIWhC9QZQr4O7s1JVl2B3BiHQT9AH15si74MMGtYgg1fKDoB6ArQe4NErlfddBH0CaaeM98NlsCeQhpOdHKDXgE4BluMM+BZhdwIPJ9BsQir8lxyygWL6GPWna5ePmCHR2wXotyA79SGFNRwL0CHT+7XlErAG7T8r/ICxMcYUrJ9ScnZG'.
-			'DczEgmSjtmb+hmeu4pnL7ey4add2W3Z63rSrB7qDneFZr3miPUCskplYTbQaLlo5j2VoJWMjDRFLq3w4cNQIIGdYCfQEloZbcvglwrJmH11PCSSFMR0z69mJjiC9eIS1lTNgX1+5KPMj09wGN+pGb5uxZVEbQvY+YPE1wRHYVdml4bb6TRMcAef00El9sppjPmu/NfTV0NdThGeu8hMwV4CR0AFmVM2OAO1Zz7YHWHgTO5a9/Q2wzwCdol79YRtlXfrjnrZ/6G9zs648AA3h/a38TjHOKk4B2QUdJ5KAiSPFTZgc8vZxcT7JA6OOA8bul5slgHTPbABxHjzKmkNI+0HWHBSgT2DE10D4HsDK+hGcRJZBE6CeY0UfVZsBZpVaKhDg13JNHaNen1/6COuBMwm6JfdjBSUa14XaelwZ8jRMHWLk/7N2KSoqKioqKiq6qBf9GY3z04RqJgAAAABJRU5ErkJggg=='
-			);
-		$my_bitmap = new wxBitmap(new wxImage(new wxMemoryInputStream($pngData,strlen($pngData)),wxBITMAP_TYPE_PNG));
+		// Embedded file code created by nwswEncodeFile.php
+		define('MSTREAM_SAMPLE_BMP',
+			'eJztl8Fu1DAQhsf4kD1U9ZXDinDkEThULOLOHXFAeQSOvaWPFsSLGPECOaZSlGHs2OO/7QalUFQJ+a8cfbs7sX/bM0764eOXI0W9k/ZG2mdpn14QGfkLei2/'.
+			'X7m1ydexcWjMVFVVVVVVVfXsajw17Fc+zWQz9/Kk7oeIhvmG2pUt80BOWW5euWEeya7svvNEJjEJ09rnK+pn4CXzkU7ArQzcAX9N7MRE5kZMII+Jg3uvPOpY'.
+			'hkfjkx8xZAsvyb+7kRlz4oFOyqOYkJGD2llMpBeYdpGBF2XLs66oCTPO6j09kboNhgEMsAVugFtgMKf7LnLA/U9fQspYbiosvXQa4ul9DrmFXn5AL8Wlmwr3'.
+			'XlkGUpaBlGWdC/MAPAEvwPwN+BZYfdrIyT+HJO40aMlzDEFDvpvjHdhTCdLZILfAFpiQW2DcC0LGvWuAca8xBzA3NvMHeY/29PPQzyFcLLADTnO8oHDsKOu6'.
+			'XYayS+zkoNH6ZdbzxMVizFz8uBkY/vlwd/J9AmbkAXgCXjLH1MgfYv4ktRAkntMRci/oxOXcuB/kIchDkMaYMoAEjYV7NUQWQtx0NsTw+ZCTPxvSzGdDqPhK'.
+			'Id3a4wIcJ+sTs1Z22N2x7GnZ66ficLSXvEI2mUMeWuCcn1G76gu52+D9ih7SGXWAfi4e8DruJXhz4fIv13MHi5+31Ci/zN4iF8/Hu9xtMGW+yuzu8rXyQKVO'.
+			'vS08t1i/yFo5zQbjoW2h3A0wQWHGd6esE9SLgyLdocMD7uL1tzmQ6yuaTfxMOXAvH9QP5urFBh9gLvQnbB7JW+9LeA5svDvhM9pCGjxG/0G9X+e1irVvgc0O'.
+			'pifha+gTeS5rZRZdqxvHQ5N4EE7+41Mw7XV8f4C9NrDXBp6WVVVVVVVVVX+jX2I+lOo=');
+		$my_bitmap = new wxBitmap(new wxImage(new nwc2gui_MemoryInStream(MSTREAM_SAMPLE_BMP,array('gz','base64')),wxBITMAP_TYPE_BMP));
 		//
 		$imgControl = new wxStaticBitmap($this,++$wxID,$my_bitmap);
 		$newrow->Add($imgControl, 0, wxGROW);

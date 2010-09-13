@@ -10,6 +10,8 @@ class nwcut_MainWindow extends wxDialog
 	{
 		parent::__construct(null,-1,"Basic Sample Interface",wxDefaultPosition,wxDefaultPosition);
 	
+		$this->SetIcons(new nwc2gui_IconBundle);
+
 		$wxID = wxID_HIGHEST;
 
 		$MainSizer = new wxBoxSizer(wxVERTICAL);
