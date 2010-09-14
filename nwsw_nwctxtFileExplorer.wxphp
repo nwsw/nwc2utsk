@@ -39,7 +39,7 @@ class nwcut_MainWindow extends wxDialog
 		global $nwctxtLines;
 		parent::__construct(null,-1,APPNAME,wxDefaultPosition,new wxSize(620,500));
 	
-		$this->SetIcons(new nwc2gui_IconBundle);
+		$this->SetIcons(new wxphp_IconBundle);
 
 		$wxID = wxID_HIGHEST;
 

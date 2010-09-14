@@ -1,0 +1,87 @@
+<?php
+require_once("wx/init.inc");
+require_once("wx/init-stc.inc");
+
+$Edit = array(
+	'FileName'	=> (isset($argv[1]) ? $argv[1] : ""),
+	'FileData'	=> (isset($argv[1]) ? file_get_contents($argv[1]) : "")
+	);
+
+class nwcut_MainWindow extends wxFrame
+{
+	function nwcut_MainWindow()
+	{
+		global $Edit;
+		$title = "";
+		if ($Edit['FileName']) $title .= basename($Edit['FileName'])." - ";
+		$title .= pathinfo($_SERVER['PHP_SELF'],PATHINFO_FILENAME);
+
+		parent::__construct(null,-1,$title,wxDefaultPosition,wxDefaultPosition);
+	
+		$this->SetIcons(new wxphp_IconBundle);
+
+		$wxID = wxID_HIGHEST;
+
+		$MainSizer = new wxBoxSizer(wxVERTICAL);
+		$this->SetSizer($MainSizer);
+		
+		$text = new wxStyledTextCtrl($this, ++$wxID,wxDefaultPosition,new wxSize(400,450));
+		$text->AddText($Edit['FileData']);
+		$text->StyleClearAll();
+		$text->SetLexer(wxSTC_LEX_HTML);
+		$text->SetStyleBits(7);
+		$text->StyleSetForeground(wxSTC_STYLE_DEFAULT, new wxColour("DARK GREY"));
+		$text->StyleSetForeground(wxSTC_H_DEFAULT, new wxColour("#AA0000"));
+		$text->StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, new wxColour("#00AA00"));
+
+		$text->StyleSetForeground(wxSTC_HPHP_COMMENT, new wxColour("#0000FF"));
+		$text->StyleSetForeground(wxSTC_HPHP_COMMENTLINE, new wxColour(0x00C000));
+		$text->StyleSetItalic(wxSTC_HPHP_COMMENTLINE, true);
+		$text->StyleSetBold(wxSTC_HPHP_SIMPLESTRING, true);
+
+		$MainSizer->Add($text,1,wxGROW);
+		
+		$this->Connect(wxEVT_CLOSE_WINDOW,array($this,"onClose"));
+
+		$MainSizer->Fit($this);
+	}
+
+	function onClose($evt)
+	{
+		$doVeto = false;
+		if ($evt->CanVeto()) {
+			$dlg = new wxMessageDialog($this,"Do Save?","Suhutdown Sequence...",wxICON_QUESTION|wxYES_NO|wxYES_DEFAULT|wxCANCEL);
+			$retcode = $dlg->ShowModal();
+			if ($retcode == wxID_CANCEL) $doVeto = true;
+			else if ($retcode != wxID_NO) echo "DoSave...\n";
+			}
+
+		if ($doVeto) $evt->Veto(true);
+		else $this->Destroy();
+	}
+}
+
+class nwcut_MainApp extends wxApp 
+{
+	function OnInit()
+	{
+		$Frame = new nwcut_MainWindow();
+		$Frame->Show();
+
+		return 0;
+	}
+	
+	function OnExit() {return 0;}
+}
+
+function nwcut_InitWX()
+{
+	$App = new nwcut_MainApp();
+	wxApp::SetInstance($App);
+	wxEntry();
+}
+
+nwcut_InitWX();
+
+exit(0);
+?>

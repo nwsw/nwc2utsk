@@ -35,7 +35,7 @@ class nwcut_MainWindow extends wxDialog
 		global $ClassList;
 		parent::__construct(null,-1,APPNAME,wxDefaultPosition,new wxSize(620,500));
 
-		$this->SetIcons(new nwc2gui_IconBundle);
+		$this->SetIcons(new wxphp_IconBundle);
 
 		$this->ClassList = get_declared_classes();
 		//
@@ -58,7 +58,7 @@ class nwcut_MainWindow extends wxDialog
 		$label = new wxStaticText($this, ++$wxID, "PHP Class List:");
 		$newcol->Add($label);
 
-		$lbox = new wxListBox($this,++$wxID,wxDefaultPosition,new wxSize(200,450),nwc2gui_wxArray($this->ClassList),wxLB_SINGLE|wxLB_HSCROLL);
+		$lbox = new wxListBox($this,++$wxID,wxDefaultPosition,new wxSize(200,450),new wxphp_ArrayString($this->ClassList),wxLB_SINGLE|wxLB_HSCROLL);
 		$this->Connect($wxID, wxEVT_COMMAND_LISTBOX_SELECTED, array($this, "doShowClassDesc"));
 		$this->ctrl_LineList = $lbox;
 		$newcol->Add($lbox);

@@ -49,9 +49,9 @@ function BuildConvScript($fname,$data,$maxl)
 {
 	return
 		'// The following code can be used to embed this file ('.$fname.')'.PHP_EOL.PHP_EOL.
-		'// Embedded file code created by nwswEncodeFile.php'.PHP_EOL.
+		'// Embedded file code created by '.basename($_SERVER['PHP_SELF']).PHP_EOL.
 		BuildEncodedDataDefine($data,max($maxl,16),"'","\t").PHP_EOL.
-		"\$$data[name] = new nwc2gui_MemoryInStream($data[id],array('".implode("','",$data["opts"])."'));".PHP_EOL;
+		"\$$data[name] = new wxphp_MemoryInputStream($data[id],array('".implode("','",$data["opts"])."'));".PHP_EOL;
 }
 
 class nwcut_MainWindow extends wxDialog
@@ -65,7 +65,7 @@ class nwcut_MainWindow extends wxDialog
 	{
 		parent::__construct(null,-1,APPNAME,wxDefaultPosition,wxDefaultPosition);
 	
-		$this->SetIcons(new nwc2gui_IconBundle);
+		$this->SetIcons(new wxphp_IconBundle);
 
 		$wxID = wxID_HIGHEST;
 
@@ -179,5 +179,5 @@ function nwcut_InitWX()
 
 nwcut_InitWX();
 
-exit(NWC2RC_REPORT);
+exit(0);
 ?>
