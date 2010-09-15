@@ -1,6 +1,6 @@
 <?php
 require_once("wx/init.inc");
-require_once("wx/init-stc.inc");
+require_once("wx/stc.inc");
 
 $Edit = array(
 	'FileName'	=> (isset($argv[1]) ? $argv[1] : ""),
@@ -9,14 +9,16 @@ $Edit = array(
 
 class nwcut_MainWindow extends wxFrame
 {
-	function nwcut_MainWindow()
+	var $Editor;
+
+	function __construct()
 	{
 		global $Edit;
 		$title = "";
 		if ($Edit['FileName']) $title .= basename($Edit['FileName'])." - ";
 		$title .= pathinfo($_SERVER['PHP_SELF'],PATHINFO_FILENAME);
 
-		parent::__construct(null,-1,$title,wxDefaultPosition,wxDefaultPosition);
+		parent::__construct(null,-1,$title);
 	
 		$this->SetIcons(new wxphp_IconBundle);
 
@@ -24,20 +26,13 @@ class nwcut_MainWindow extends wxFrame
 
 		$MainSizer = new wxBoxSizer(wxVERTICAL);
 		$this->SetSizer($MainSizer);
+		$MainSizer->SetMinSize(640,480);
 		
-		$text = new wxStyledTextCtrl($this, ++$wxID,wxDefaultPosition,new wxSize(400,450));
+		$text = new wxphp_StyledTextCtrl($this, ++$wxID);
 		$text->AddText($Edit['FileData']);
-		$text->StyleClearAll();
-		$text->SetLexer(wxSTC_LEX_HTML);
-		$text->SetStyleBits(7);
-		$text->StyleSetForeground(wxSTC_STYLE_DEFAULT, new wxColour("DARK GREY"));
-		$text->StyleSetForeground(wxSTC_H_DEFAULT, new wxColour("#AA0000"));
-		$text->StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, new wxColour("#00AA00"));
-
-		$text->StyleSetForeground(wxSTC_HPHP_COMMENT, new wxColour("#0000FF"));
-		$text->StyleSetForeground(wxSTC_HPHP_COMMENTLINE, new wxColour(0x00C000));
-		$text->StyleSetItalic(wxSTC_HPHP_COMMENTLINE, true);
-		$text->StyleSetBold(wxSTC_HPHP_SIMPLESTRING, true);
+		$text->SetPHPStyle();
+		$text->SetSavePoint();
+		$this->Editor = $text;
 
 		$MainSizer->Add($text,1,wxGROW);
 		
@@ -49,8 +44,8 @@ class nwcut_MainWindow extends wxFrame
 	function onClose($evt)
 	{
 		$doVeto = false;
-		if ($evt->CanVeto()) {
-			$dlg = new wxMessageDialog($this,"Do Save?","Suhutdown Sequence...",wxICON_QUESTION|wxYES_NO|wxYES_DEFAULT|wxCANCEL);
+		if ($evt->CanVeto() && $this->Editor->GetModify()) {
+			$dlg = new wxMessageDialog($this,"There are unsaved changes.\n\nSave?","Confirm Save File",wxICON_QUESTION|wxYES_NO|wxYES_DEFAULT|wxCANCEL);
 			$retcode = $dlg->ShowModal();
 			if ($retcode == wxID_CANCEL) $doVeto = true;
 			else if ($retcode != wxID_NO) echo "DoSave...\n";

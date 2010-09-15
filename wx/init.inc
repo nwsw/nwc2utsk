@@ -2,7 +2,6 @@
 if (!function_exists('wxEntry')) dl(class_exists("COM") ? 'php_wxWidgets.dll' : "wxwidgets.so");
 
 if (!defined("WXPHP_NO_INIT_IMAGE_HANDLING")) include 'init-imghandling.inc';
-if (defined("WXPHP_INIT_STC")) include 'init-stc.inc';
 
 class wxphp_ArrayString extends wxArrayString {
 	function __construct($a)
