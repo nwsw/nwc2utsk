@@ -1,6 +1,6 @@
 <?php
 define("APPNAME","nwsw PHP Class Explorer");
-define("APPVERSION","0.1");
+define("APPVERSION","0.2");
 define("APPDESC",
 <<<___EODESC
 This tool shows all of the available PHP classes. You can click
@@ -33,7 +33,7 @@ class nwcut_MainWindow extends wxDialog
 	function __construct()
 	{
 		global $ClassList;
-		parent::__construct(null,-1,APPNAME,wxDefaultPosition,new wxSize(620,500));
+		parent::__construct(null,-1,APPNAME,wxDefaultPosition,wxDefaultSize,wxDEFAULT_FRAME_STYLE);
 
 		$this->SetIcons(new wxphp_IconBundle);
 
@@ -43,34 +43,46 @@ class nwcut_MainWindow extends wxDialog
 		while (strstr(end($this->ClassList),'nwcut_')) array_pop($this->ClassList);
 		//
 		sort($this->ClassList);
+		//
+		array_unshift($this->ClassList,"<defined_constants>","<defined_functions>");
 	
 		$wxID = wxID_HIGHEST;
 
 		$MainSizer = new wxBoxSizer(wxVERTICAL);
 		$this->SetSizer($MainSizer);
+		$MainSizer->SetMinSize(620,500);
 
-		$newrow = new wxBoxSizer(wxHORIZONTAL);
-		$MainSizer->Add($newrow, 0, wxEXPAND|wxALL,10);
+		$sw = new wxSplitterWindow($this,++$wxID);
+		$sw->SetMinimumPaneSize(150);
+		$left = new wxPanel($sw);
+		$right = new wxPanel($sw);
+		$sw->SplitVertically($left,$right,200);
 
 		$newcol = new wxBoxSizer(wxVERTICAL);
-		$newrow->Add($newcol, 0, wxEXPAND);
-
-		$label = new wxStaticText($this, ++$wxID, "PHP Class List:");
+		$left->SetSizer($newcol);
+		//
+		$label = new wxStaticText($left, ++$wxID, "PHP Class List:");
 		$newcol->Add($label);
-
-		$lbox = new wxListBox($this,++$wxID,wxDefaultPosition,new wxSize(200,450),new wxphp_ArrayString($this->ClassList),wxLB_SINGLE|wxLB_HSCROLL);
+		//
+		$lbox = new wxListBox($left,++$wxID,wxDefaultPosition,wxDefaultSize,new wxphp_ArrayString($this->ClassList),wxLB_SINGLE|wxLB_HSCROLL);
 		$this->Connect($wxID, wxEVT_COMMAND_LISTBOX_SELECTED, array($this, "doShowClassDesc"));
 		$this->ctrl_LineList = $lbox;
-		$newcol->Add($lbox);
+		$newcol->Add($lbox,1,wxEXPAND);
+		$newcol->Fit($left);
 
-		$newrow->AddSpacer(10);
-
-		$newcol = new wxStaticBoxSizer(wxVERTICAL,$this,"Class Description");
-		$newrow->Add($newcol, 1, wxGROW);
-		$text = new wxTextCtrl($this, ++$wxID,"Select a class at the left to have it described here",wxDefaultPosition,new wxSize(400,450),wxTE_MULTILINE|wxTE_DONTWRAP|wxTE_NOHIDESEL|wxTE_READONLY);
+		$newcol = new wxBoxSizer(wxVERTICAL);
+		$right->SetSizer($newcol);
+		//
+		$label = new wxStaticText($right, ++$wxID, "Description:");
+		$newcol->Add($label);
+		//
+		$text = new wxTextCtrl($right, ++$wxID,"Select a class at the left to have it described here",wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE|wxTE_DONTWRAP|wxTE_NOHIDESEL|wxTE_READONLY);
 		$newcol->Add($text,1,wxEXPAND);
 		$this->ctrl_Desc = $text;
+		$newcol->Fit($right);
 
+		$MainSizer->Add($sw, 1, wxEXPAND|wxALL,12);
+		
 		$btnrow = new wxStaticBoxSizer(wxVERTICAL,$this);
 		$MainSizer->Add($btnrow,0,wxEXPAND);
 
@@ -105,6 +117,12 @@ class nwcut_MainWindow extends wxDialog
 			return;
 			}
 
+		if ($linenum < 2) {
+			$funct_nm = 'get_'.substr($nm,1,-1);
+			$this->ctrl_Desc->SetValue(print_r($funct_nm(),true));
+			return;
+			}
+		
 		$cm = get_class_methods($nm);
 		$cv = get_class_vars($nm);
 
