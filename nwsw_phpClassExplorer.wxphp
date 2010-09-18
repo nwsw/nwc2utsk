@@ -68,7 +68,6 @@ class nwcut_MainWindow extends wxDialog
 		$this->Connect($wxID, wxEVT_COMMAND_LISTBOX_SELECTED, array($this, "doShowClassDesc"));
 		$this->ctrl_LineList = $lbox;
 		$newcol->Add($lbox,1,wxEXPAND);
-		$newcol->Fit($left);
 
 		$newcol = new wxBoxSizer(wxVERTICAL);
 		$right->SetSizer($newcol);
@@ -79,7 +78,6 @@ class nwcut_MainWindow extends wxDialog
 		$text = new wxTextCtrl($right, ++$wxID,"Select a class at the left to have it described here",wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE|wxTE_DONTWRAP|wxTE_NOHIDESEL|wxTE_READONLY);
 		$newcol->Add($text,1,wxEXPAND);
 		$this->ctrl_Desc = $text;
-		$newcol->Fit($right);
 
 		$MainSizer->Add($sw, 1, wxEXPAND|wxALL,12);
 		

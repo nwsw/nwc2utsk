@@ -1,24 +1,71 @@
 <?php
+define("APPNAME","nwsw_SimpleEditor");
+define("APPVERSION","0.1");
+define("APPDESC",
+<<<___EODESC
+This program can be used to edit PHP source files. It uses wxphp's
+built-in wxStyledTextCtrl to provide syntax highlighting and 
+other basic source code editing features.
+___EODESC
+);
+
 require_once("wx/init.inc");
 require_once("wx/stc.inc");
 
-$Edit = array(
-	'FileName'	=> (isset($argv[1]) ? $argv[1] : ""),
-	'FileData'	=> (isset($argv[1]) ? file_get_contents($argv[1]) : "")
-	);
+class wxdlg_SimpleFind extends wxDialog
+{
+	var $ctrlText = false;
+
+	function __construct($parent, $initFindStr="")
+	{
+		parent::__construct($parent,-1,"Find Text");
+
+		$wxID = wxID_HIGHEST;
+		$MainSizer = new wxBoxSizer(wxVERTICAL);
+		$this->SetSizer($MainSizer);
+		
+		$ControlPanel = new wxBoxSizer(wxVERTICAL);
+		$MainSizer->Add($ControlPanel,0,wxGROW|wxALL,5);
+
+		$box = new wxStaticBoxSizer(wxVERTICAL, $this);
+		$ControlPanel->Add($box,1,wxGROW);
+
+		$label = new wxStaticText($this, -1, "Enter find text:");
+		$box->Add($label);
+		//
+		$this->ctrlText = new wxTextCtrl($this,++$wxID,$initFindStr,wxDefaultPosition,new wxSize(300,-1));
+		$box->Add($this->ctrlText);
+
+		$ControlPanel->AddSpacer(5);
+
+		$box = new wxBoxSizer(wxHORIZONTAL);
+		$ControlPanel->Add($box,0,wxALIGN_CENTER|wxALL,0);
+
+		$btn_ok = new wxButton($this, wxID_OK);
+		$box->Add($btn_ok,0,wxGROW);
+		$btn_ok->SetDefault();
+
+		$box->AddSpacer(5);
+
+		$btn_cancel = new wxButton($this, wxID_CANCEL);
+		$box->Add($btn_cancel,0,wxGROW);
+
+		$MainSizer->Fit($this);
+	}
+}
 
 class nwcut_MainWindow extends wxFrame
 {
-	var $Editor;
+	var $Editor = false;
+	var $Filename = false;
+	var $FindText = false;
 
 	function __construct()
 	{
-		global $Edit;
-		$title = "";
-		if ($Edit['FileName']) $title .= basename($Edit['FileName'])." - ";
-		$title .= pathinfo($_SERVER['PHP_SELF'],PATHINFO_FILENAME);
+		global $argv;
+		$this->Filename = isset($argv[1]) ? $argv[1] : false;
 
-		parent::__construct(null,-1,$title);
+		parent::__construct(null,-1,APPNAME);
 	
 		$this->SetIcons(new wxphp_IconBundle);
 
@@ -29,29 +76,217 @@ class nwcut_MainWindow extends wxFrame
 		$MainSizer->SetMinSize(640,480);
 		
 		$text = new wxphp_StyledTextCtrl($this, ++$wxID);
-		$text->AddText($Edit['FileData']);
-		$text->SetPHPStyle();
-		$text->SetSavePoint();
+		//
+		$text->LoadFile($this->Filename);
+		$text->EnableLineNumbers(true);
 		$this->Editor = $text;
+		//
+		$this->Connect($wxID,wxEVT_STC_CHANGE,array($this,"onTextChange"));
 
 		$MainSizer->Add($text,1,wxGROW);
 		
 		$this->Connect(wxEVT_CLOSE_WINDOW,array($this,"onClose"));
 
 		$MainSizer->Fit($this);
+
+		$MenuDef = array();
+		$MenuDef["&File"] = array(
+			array(++$wxID,"&New\tCtrl+N","doFileNew"),
+			array(++$wxID,"&Open...\tCtrl+O","doFileOpen"),
+			array(++$wxID,"&Save\tCtrl+S","doFileSave"),
+			array(++$wxID,"Save &As...","doFileSaveAs"),
+			-1,
+			array(++$wxID,"E&xit","doFileExit"),
+			);
+		$MenuDef["&Edit"] = array(
+			array(++$wxID,"&Undo\tCtrl+Z","doEditUndo","upduiEditUndo"),
+			array(++$wxID,"&Redo\tCtrl+Y","doEditRedo","upduiEditRedo"),
+			-1,
+			array(++$wxID,"Cu&t\tCtrl+X","doEditCut","upduiEditSelection"),
+			array(++$wxID,"&Copy\tCtrl+C","doEditCopy","upduiEditSelection"),
+			array(++$wxID,"&Paste\tCtrl+V","doEditPaste","upduiEditPaste"),
+			-1,
+			array(++$wxID,"&Find\tCtrl+F","doFind"),
+			array(++$wxID,"Find &Next\tF3","doFindNext"),
+			-1,
+			array(++$wxID,"Select &All\tCtrl+A","doSelAll")
+			);
+		$MenuDef["&View"] = array(
+			array(++$wxID,"&Indent Guide","toggleIndentGuides","updateuiIndentGuides"),
+			array(++$wxID,"White&space","toggleWhitespace","updateuiWhitespace"),
+			array(++$wxID,"&Word-wrap","toggleWordWrap","updateuiWordWrap")
+			);
+		$MenuDef["&Help"] = array(
+			array(++$wxID,"&About","onAbout")
+			);
+		
+		$menuBar = new wxMenuBar();
+		foreach ($MenuDef as $title => $cmds) {
+			$menu = new wxMenu();
+			$menuBar->Append($menu,$title);
+			foreach ($cmds as $cmd) {
+				if (!is_array($cmd)) {
+					$menu->AppendSeparator();
+					continue;
+					}
+				list($id,$cmdtxt,$doMethod) = $cmd;
+				$cmdType = wxITEM_NORMAL;
+				if (strpos($doMethod,'toggle') === 0) $cmdType = wxITEM_CHECK;
+				$menu->Append($id,$cmdtxt,"",$cmdType);
+				if ($doMethod) $this->Connect($id,wxEVT_COMMAND_MENU_SELECTED,array($this,$doMethod));
+				if (!empty($cmd[3])) $this->Connect($id,wxEVT_UPDATE_UI,array($this,$cmd[3]));
+				}
+			}
+		//
+		$this->SetMenuBar($menuBar);
+
+		$this->UpdateTitle(false,true);
+	}
+
+	function UpdateTitle($saveNeeded,$force)
+	{
+		static $ShownAsChanged = false;
+
+		if ($force || ($saveNeeded != $ShownAsChanged)) {
+			$ShownAsChanged = $saveNeeded;
+
+			$title = $this->Filename;
+			if (!$title) $title = "Untitled";
+			else $title = basename($title);
+
+			if ($saveNeeded) $title .= " **";
+
+			$title .= " - ".APPNAME;
+
+			$this->SetTitle($title);
+			}
+	}
+
+	function onTextChange($evt)
+	{
+		$this->UpdateTitle($this->Editor->GetModify(),false);
+	}
+
+	function LoadFile($fn)
+	{
+		if (!$this->FileGrantCloseRequest()) return;
+
+		$this->Filename = $fn;
+		$this->Editor->LoadFile($fn);
+		$this->UpdateTitle(false,true);
+	}
+
+	function doFileNew()
+	{
+		$this->LoadFile(false);
+	}
+
+	function doFileOpen()
+	{
+		$dlg = new wxFileDialog($this,"File Open",getcwd(),"","PHP Files|*.php;*.inc;*.wxphp|All Files|*.*",wxFD_OPEN);
+		if ($dlg->ShowModal() == wxID_OK) {
+			$this->LoadFile($dlg->GetPath());
+			}
+	}
+
+	function doFileSave()
+	{
+		if (!$this->Filename) {$this->doFileSaveAs(); return;}
+		$this->Editor->SaveFile($this->Filename);
+		$this->UpdateTitle(false,true);
+	}
+
+	function doFileSaveAs()
+	{
+		$dlg = new wxFileDialog($this,"File Save As",getcwd(),strval($this->Filename),"PHP Files|*.php;*.inc;*.wxphp|All Files|*.*",wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		if ($dlg->ShowModal() == wxID_OK) {
+			$this->Filename = $dlg->GetPath();
+			if ($this->Filename) $this->doFileSave();
+			}
+	}
+
+	function FileGrantCloseRequest($canVeto=true)
+	{
+		$doVeto = false;
+		if ($this->Editor->GetModify()) {
+			$mbflags = wxICON_QUESTION|wxYES_NO|wxYES_DEFAULT;
+			if ($canVeto) $mbflags |= wxCANCEL;
+			$dlg = new wxMessageDialog($this,"There are unsaved changes.\n\nDo you want to save them?","Save Changes",$mbflags);
+			$retcode = $dlg->ShowModal();
+			if ($canVeto && ($retcode == wxID_CANCEL)) $doVeto = true;
+			else if ($retcode != wxID_NO) $this->doFileSave();
+			}
+
+		return !$doVeto;
+	}
+
+	function doFileExit($evt)	{if ($this->FileGrantCloseRequest()) $this->Destroy();}
+	function doEditUndo($evt)	{$this->Editor->Undo();}
+	function doEditRedo($evt)	{$this->Editor->Redo();}
+	function doEditCut($evt)	{$this->Editor->Cut();}
+	function doEditCopy($evt)	{$this->Editor->Copy();}
+	function doEditPaste($evt) {$this->Editor->Paste();}
+	function doEditSelAll($evt)	{$this->Editor->SelectAll();}
+
+	function upduiEditSelection($evt)	{$evt->Enable($this->Editor->GetSelectionStart() != $this->Editor->GetSelectionEnd());}
+	function upduiEditPaste($evt)	{$evt->Enable($this->Editor->CanPaste());}
+	function upduiEditRedo($evt)	{$evt->Enable($this->Editor->CanRedo());}
+	function upduiEditUndo($evt)	{$evt->Enable($this->Editor->CanUndo());}
+
+	function doFind()
+	{
+		$term = &$this->FindText;
+		$findDlg = new wxdlg_SimpleFind($this,$term ? $term : "");
+		if ($findDlg->ShowModal() == wxID_OK) {
+			$term = $findDlg->ctrlText->GetValue();
+			$this->doFindNext();
+			}
+	}
+
+	function doFindNext()
+	{
+		$term = &$this->FindText;
+		if (!$term) { $this->doFind(); return;}
+		$this->Editor->SetTargetStart($this->Editor->GetCurrentPos());
+		$this->Editor->SetTargetEnd($this->Editor->GetTextLength());
+
+		$r = $this->Editor->SearchInTarget($term);
+		if ($r < 0) {
+			$dlg = new wxMessageDialog($this,"The text '$term' was not found.","Not Found",wxICON_INFORMATION);
+			$dlg->ShowModal();
+			return;
+			}
+
+		$s1 = $this->Editor->GetTargetStart();
+		$s2 = $this->Editor->GetTargetEnd();
+		$this->Editor->SetSelection($s1,$s2);
+	}
+
+	function toggleWordWrap($evt)	{$this->Editor->SetWrapMode(($this->Editor->GetWrapMode() ? 0 : 1));}
+	function updateuiWordWrap($evt)	{$evt->Check($this->Editor->GetWrapMode() != 0);}
+
+	function toggleWhitespace($evt)
+	{
+		$this->Editor->SetViewWhiteSpace(($this->Editor->GetViewWhiteSpace() ? 0 : 1));
+	}
+	function updateuiWhitespace($evt)	{$evt->Check($this->Editor->GetViewWhiteSpace() != 0);}
+
+	function toggleIndentGuides($evt)	{$this->Editor->SetIndentationGuides(($this->Editor->GetIndentationGuides() ? 0 : 1));}
+	function updateuiIndentGuides($evt)	{$evt->Check($this->Editor->GetIndentationGuides() != 0);}
+
+	function onAbout()
+	{
+		$dlg = new wxMessageDialog($this,
+			APPNAME." (Version ".APPVERSION.")\n\n".
+			APPDESC."\n",
+			"About",wxICON_INFORMATION);
+		$dlg->ShowModal();
 	}
 
 	function onClose($evt)
 	{
-		$doVeto = false;
-		if ($evt->CanVeto() && $this->Editor->GetModify()) {
-			$dlg = new wxMessageDialog($this,"There are unsaved changes.\n\nSave?","Confirm Save File",wxICON_QUESTION|wxYES_NO|wxYES_DEFAULT|wxCANCEL);
-			$retcode = $dlg->ShowModal();
-			if ($retcode == wxID_CANCEL) $doVeto = true;
-			else if ($retcode != wxID_NO) echo "DoSave...\n";
-			}
-
-		if ($doVeto) $evt->Veto(true);
+		$canVeto = $evt->CanVeto();
+		if (!$this->FileGrantCloseRequest($canVeto) && $canVeto) $evt->Veto(true);
 		else $this->Destroy();
 	}
 }
