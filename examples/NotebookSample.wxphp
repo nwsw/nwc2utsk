@@ -2,6 +2,20 @@
 require_once("lib/nwc2clips.inc");
 require_once("lib/nwc2gui.inc");
 
+{ define ('NWCTXT_ICO', serialize(array('
+iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAJFBMVEX///8AAAAA//+AgIDAwMAA
+AP//AAAAgIAAAICAAACAAICAgAD4y7SEAAAAAXRSTlMAQObYZgAAAONJREFUeF59krFqwzAQhk+2
+s2Tyxe0LKO2SydE5JKOLlD3glHQM2fwExmNpIGTs1OfoG/bi2j8BQz4hcfzc6UMgIr4nJSLdRxJZ
+X0S5BYYUZ99D5ewcHe6VaPojfaC4l1AmTd0F5r/jsKNm1gWzSHGL9im5aoA76vYcswawfNvdtrHD
+yCly1pYHDWBhfp58MjMshT9/rCovsORxGUpvMljyQqvqLYOl2IcQxHtY8iBfGwkxLJn8qkOWsAwM
+FgCLYe42LHqmqVawROa2MKKYbhEs/cgDSw8sAJYeWMD4LeOO0Xf4A9X+JtsNwhtiAAAAAElFTkSu
+QmCC
+','
+iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX///8AAADAwMC/YCrjAAAA
+AXRSTlMAQObYZgAAAERJREFUeF4ljLENgEAMxE6UbAIjZQOYgiW+SCqqV+IpQZ/Gkl1YGzza4dUJ
+qXlj8nAa4WHijxo2TDUvVFWN1iM812CtPnc6I0qDzWdAAAAAAElFTkSuQmCC
+')));}
+
 class nwcut_NotebookPage extends wxPanel
 {
 	private $PanelNum = -1;
@@ -78,7 +92,7 @@ class nwcut_NotebookFrame extends wxDialog
 	{
 		parent::__construct(null,-1,"Sample Notebook Interface",wxDefaultPosition,new wxSize(690,400));
 	
-		$this->SetIcons(new wxphp_IconBundle);
+		$this->SetIcons(new wxphp_IconBundle(unserialize(NWCTXT_ICO),wxBITMAP_TYPE_PNG));
 
 		$wxID = wxID_HIGHEST;
 
