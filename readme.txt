@@ -1,7 +1,9 @@
 User Tool Starter Kit
 - for NoteWorthy Composer 2.5
 
-This package installs a set of built-in tools for use with the User Tool command in NoteWorthy Composer 2.5. After installing this package, several new built-in tools groups will be available from the User Tool command (Alt+F8), including .Starter Tools, .File Tools, and .Developer Tools groups. Built-in tools that are installed include:
+This package installs a set of built-in tools for use with the User Tool command in NoteWorthy Composer 2.5. After installing this package, several new built-in tools groups will be available from the User Tool command (Alt+F8), including .Starter Tools, .File Tools, and .Developer Tools groups. 
+
+Built-in tools that are installed include:
 
 Arpeggiate (nwsw)
 This script adds leading grace notes into selected quarter, half, or whole note chords in order to create an arpeggio sound effect during play back.
@@ -41,6 +43,9 @@ A script written by Andrew Purdam which returns the note ranges in a selection.
 
 Transpose Chords (adp)
 A script written by Andrew Purdam which will automatically transpose chords written as text.
+
+Run User Tool (prw)
+A tool by Randy Williams that facilitates running any existing clip script against a whole file or select staves in a file.
 
 About Starter Kit (nwsw)
 This script simply displays a message describing the start kit and the currently installed version of the utility library.
