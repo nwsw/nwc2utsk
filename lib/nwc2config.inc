@@ -17,7 +17,7 @@ function NWC2_GetUserOption(<option-name>)
 	items include: "InstrumentTree", "LastToolRun", and "PianoConfig"
 
 
-Copyright © 2010 by NoteWorthy Software, Inc.
+Copyright © 2011 by NoteWorthy Software, Inc.
 All Rights Reserved
 
 HISTORY:

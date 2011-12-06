@@ -133,6 +133,12 @@ function UpdateContext($o)
 			$this->PendingBarIncrement = ($o->GetTaggedOpt("XBarCnt","N") != "Y");
 			break;
 
+		case "RestMultiBar":
+			if ($this->PendingBarIncrement) $this->NextBarNum++;
+			$this->PendingBarIncrement = false;
+			$this->NextBarNum += nw_aafield($o->Opts,"NumBars",1)-1;
+			break;
+
 		case "Clef":
 			$this->Clef = $o->GetTaggedOpt("Type","Treble");
 			$this->ClefOctave = $o->GetTaggedOpt("OctaveShift","None");

@@ -76,7 +76,7 @@ function NWC2ClipItemWithPitchPos($itemtext,$remapFakes=false)
 {
 	parent::__construct($itemtext,$remapFakes);
 
-	if (in_array($this->ObjType, array('Note','Chord','RestChord'))) foreach (array("Pos","Pos2") as $pos_tag) {
+	if ($this->ObjTypeHasPitchPos($this->ObjType)) foreach (array("Pos","Pos2") as $pos_tag) {
 		$notePosList = $this->GetTaggedOptAsArray($pos_tag,false);
 		if (is_array($notePosList)) foreach ($notePosList as $np) $this->PitchPos[$pos_tag][] = new NWC2NotePitchPos($np);
 		}
@@ -84,7 +84,7 @@ function NWC2ClipItemWithPitchPos($itemtext,$remapFakes=false)
 
 function ReconstructPosOpts()
 {
-	foreach (array("Pos","Pos2") as $pos_tag) {
+	if ($this->ObjTypeHasPitchPos($this->ObjType)) foreach (array("Pos","Pos2") as $pos_tag) {
 		if (!isset($this->Opts[$pos_tag])) continue;
 		$this->Opts[$pos_tag] = array();
 		foreach ($this->PitchPos[$pos_tag] as $npp) $this->Opts[$pos_tag][] = $npp->ReconstructClipText();

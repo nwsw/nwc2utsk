@@ -1,5 +1,5 @@
 <?php
-function NWC2ClipLibVersion() {return "2.493";}
+function NWC2ClipLibVersion() {return "2.494";}
 /*******************************************************************************
 This is a support API for interfacing to NWC2 clip text. A forum dedicated to 
 NWC2 user tools can be found here:
@@ -7,7 +7,7 @@ NWC2 user tools can be found here:
 NoteWorthy Composer > User Tools
 http://my.noteworthysoftware.com/?board=7.0
 
-Copyright © 2010 by NoteWorthy Software, Inc.
+Copyright © 2011 by NoteWorthy Software, Inc.
 All Rights Reserved
 *******************************************************************************/
 
@@ -120,6 +120,8 @@ function NWC2ClassifyOptTag($ObjType,$Tag)
 	if (strpos("_|Text|Name|Label|Group|Typeface|",$b_Tag) || ($ObjType == "SongInfo")) return NWC2OPT_TEXT;
 
 	if ($Tag == "DynVel") return NWC2OPT_LIST;
+
+	if (strpos("_|WithNextStaff|WhenHidden|",$b_Tag)) return NWC2OPT_LIST;
 
 	if (($Tag == "Signature") && ($ObjType == "Key")) return NWC2OPT_ASSOCIATIVE;
 	if (($Tag == "Bar") && ($ObjType == "Context")) return NWC2OPT_LIST;

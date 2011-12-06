@@ -2,7 +2,7 @@
 
 /**************************************************************************************************
 
-Run User Tool - Version 1.0
+Run User Tool - Version 1.2
 
 This is a special user tool in that it does not perform any action itself, but
 instead can perform multiple actions, by running other user tools.  It is used
@@ -31,7 +31,7 @@ Intermediate usages:
 	Command: php\php.exe scripts\prw_RunUserTool.php <staffsubset>
 
 	where <staffsubset> is one of:
-		all, visible, hidden, audible, muted, stdstyle, orchestral,
+		all, visible, hidden, audible, muted, 
 		oneline, fivelines, devicezero, deviceone, maxvolume, channelten
 
 - Dedicated to a particular user tool
@@ -86,16 +86,12 @@ require_once("lib/nwc2clips.inc");
 require_once("lib/nwc2config.inc");
 require_once("lib/nwc2gui.inc");
 
-define("RUT_PAGEWIDTH", 400);
-
 $builtinsubsets = array(
 	"all" => null,
 	"visible" => array("Visible", "Y"),
 	"hidden" => array("Visible", "N"),
 	"audible" => array("Muted", "N"),
 	"muted" => array("Muted", "Y"),
-	"stdstyle" => array("Style", "Standard"),
-	"orchestral" => array("Style", "Orchestral"),
 	"oneline" => array("Lines", 1),
 	"fivelines" => array("Lines", 5),
 	"devicezero" => array("Device", 0),
@@ -205,7 +201,7 @@ class ParseSong {
 
 		$cliptext[] = NWC2_STARTCLIP."({$this->Version},Single)".PHP_EOL;
 
-		$cliptext[] = "|Fake|Instrument|Trans:$trans".PHP_EOL;
+		if ($trans) $cliptext[] = "|Fake|Instrument|Trans:$trans".PHP_EOL;
 		$cliptext[] = "|Context|Bar:$startingbar,AtStart".PHP_EOL;
 
 		$cliptext = array_merge($cliptext, $StaffData->BodyItems);
@@ -399,25 +395,24 @@ class NWC2UserTools {
 
 /*************************************************************************************************/
 
-class wizardPanel extends wxPanel
+class wizardPanel extends wxScrolledWindow
 {
-	private $nextButton = null;
+	static $parent = null;
+	static $size = null;
+	static $nextButton = null;
 	private $panelSizer = null;
 
 	private $wxID = wxID_HIGHEST;
 
-	function __construct ($parent, $nextButton, $prompt) {
-		parent::__construct($parent);
+	function __construct ($prompt) {
+		parent::__construct(self::$parent, -1, wxDefaultPosition, self::$size);
 
-		$this->nextButton = $nextButton;
 		$this->updateNextButton();
 
 		$this->panelSizer = new wxBoxSizer(wxVERTICAL);
 		$this->SetSizer($this->panelSizer);
 
-		// create prompt field at maximum panel size, to force out other fields
-		$statictext = new wxStaticText($this, $this->new_wxID(), $prompt, wxDefaultPosition,
-						new wxSize(RUT_PAGEWIDTH - 20, -1));
+		$statictext = new wxStaticText($this, $this->new_wxID(), $prompt);
 		$this->panelSizer->Add($statictext, 0, wxALL, 10);
 	}
 
@@ -428,17 +423,21 @@ class wizardPanel extends wxPanel
 
 	// call this when the validity of the next button may have changed
 	final protected function updateNextButton () {
-		$this->nextButton->Enable($this->isNextValid());
+		self::$nextButton->Enable($this->isNextValid());
 	}
 
-	final protected function newRow () {
+	final protected function enableScrolling () {
+		$this->SetScrollRate(0, 10);
+	}
+
+	final protected function newRow ($prop = 0) {
 		$rowSizer = new wxBoxSizer(wxHORIZONTAL);
-		$this->panelSizer->Add($rowSizer, 0, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 10);
+		$this->panelSizer->Add($rowSizer, $prop, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 10);
 		return $rowSizer;
 	}
 
 	final protected function doFit () {
-		$this->panelSizer->Fit($this);
+		$this->panelSizer->FitInside($this);
 	}
 
 	final protected function new_wxID () {
@@ -467,10 +466,10 @@ class staffPanel extends wizardPanel
 	private $staffselected = array();
 	private $staffobject = null;
 
-	function __construct ($parent, $nextButton, $SongData, $staffsubset) {
+	function __construct ($SongData, $staffsubset) {
 		global $builtinsubsets;
 
-		parent::__construct($parent, $nextButton, self::prompt);
+		parent::__construct(self::prompt);
 
 		$this->SongData = $SongData;
 		$virtGroupStaffs = array_fill_keys(array_keys($builtinsubsets), array());
@@ -519,30 +518,21 @@ class staffPanel extends wizardPanel
 
 		//------------------------------------------------------------------------
 
-		$rowSizer = $this->newRow();
+		$rowSizer = $this->newRow($group2list ? 1 : 0);
+		$listboxHeight = ($group2list ? 0 : -1);
 
 		//-------------------------------------------------
 		// groups listboxes
 
-		if ($group2list) {
-			$groupheight = 190 * count($grouplist) / (count($grouplist) + count($group2list));
-			$group2height = 190 - $groupheight;
-			$staffheight = 210;
-		}
-		else {
-			$groupheight = -1;
-			$staffheight = -1;
-		}
-
 		$colSizer = new wxBoxSizer(wxVERTICAL);
-		$rowSizer->Add($colSizer, 3);
+		$rowSizer->Add($colSizer, 3, wxGROW);
 
 		$statictext = new wxStaticText($this, $this->new_wxID(), "Groups:");
 		$colSizer->Add($statictext);
 
-		$listbox = new wxCheckListBox($this, $this->new_wxID(), wxDefaultPosition, new wxSize(-1, $groupheight),
+		$listbox = new wxCheckListBox($this, $this->new_wxID(), wxDefaultPosition, new wxSize(-1, $listboxHeight),
 					new wxphp_ArrayString($grouplist));
-		$colSizer->Add($listbox, 0, wxGROW|wxALIGN_LEFT);
+		$colSizer->Add($listbox, 1, wxGROW);
 
 		$this->Connect($this->cur_wxID(), wxEVT_COMMAND_CHECKLISTBOX_TOGGLED, array($this, "handleSelectGroup"));
 		$this->groupobject = $listbox;
@@ -551,9 +541,9 @@ class staffPanel extends wizardPanel
 			$statictext = new wxStaticText($this, $this->new_wxID(), "Built-in Groups:");
 			$colSizer->Add($statictext, 0, wxTOP, 8);
 
-			$listbox = new wxCheckListBox($this, $this->new_wxID(), wxDefaultPosition, new wxSize(-1, $group2height),
+			$listbox = new wxCheckListBox($this, $this->new_wxID(), wxDefaultPosition, new wxSize(-1, $listboxHeight),
 						new wxphp_ArrayString($group2list));
-			$colSizer->Add($listbox, 0, wxGROW|wxALIGN_LEFT);
+			$colSizer->Add($listbox, 1, wxGROW);
 
 			$this->Connect($this->cur_wxID(), wxEVT_COMMAND_CHECKLISTBOX_TOGGLED, array($this, "handleSelectGroup2"));
 			$this->group2object = $listbox;
@@ -563,14 +553,14 @@ class staffPanel extends wizardPanel
 		// staffs listbox
 
 		$colSizer = new wxBoxSizer(wxVERTICAL);
-		$rowSizer->Add($colSizer, 5, wxLEFT, 10);
+		$rowSizer->Add($colSizer, 5, wxGROW|wxLEFT, 10);
 
 		$statictext = new wxStaticText($this, $this->new_wxID(), "Staffs:");
 		$colSizer->Add($statictext);
 
-		$listbox = new wxCheckListBox($this, $this->new_wxID(), wxDefaultPosition, new wxSize(-1, $staffheight),
+		$listbox = new wxCheckListBox($this, $this->new_wxID(), wxDefaultPosition, new wxSize(-1, $listboxHeight),
 					new wxphp_ArrayString($stafflist));
-		$colSizer->Add($listbox, 0, wxGROW|wxALIGN_RIGHT);
+		$colSizer->Add($listbox, 1, wxGROW);
 
 		$this->Connect($this->cur_wxID(), wxEVT_COMMAND_CHECKLISTBOX_TOGGLED, array($this, "handleSelectStaff"));
 		$this->staffobject = $listbox;
@@ -657,8 +647,8 @@ class toolPanel extends wizardPanel
 
 	private static $selections = array();
 
-	function __construct ($parent, $nextButton, $usertools, $usertool) {
-		parent::__construct($parent, $nextButton, self::prompt);
+	function __construct ($usertools, $usertool) {
+		parent::__construct(self::prompt);
 
 		$this->usertools = $usertools;
 		$this->grouplist = array_keys($this->usertools);
@@ -677,7 +667,7 @@ class toolPanel extends wizardPanel
 		$colSizer->Add($statictext);
 
 		$listbox = new wxListBox($this, $this->new_wxID());
-		$colSizer->Add($listbox, 1, wxGROW|wxALIGN_LEFT);
+		$colSizer->Add($listbox, 1, wxGROW);
 
 		$this->Connect($this->cur_wxID(), wxEVT_COMMAND_LISTBOX_SELECTED, array($this, "handleSelectGroup"));
 		$this->groupobject = $listbox;
@@ -692,7 +682,7 @@ class toolPanel extends wizardPanel
 		$colSizer->Add($statictext);
 
 		$listbox = new wxListBox($this, $this->new_wxID());
-		$colSizer->Add($listbox, 1, wxGROW|wxALIGN_RIGHT);
+		$colSizer->Add($listbox, 1, wxGROW);
 
 		$this->Connect($this->cur_wxID(), wxEVT_COMMAND_LISTBOX_SELECTED, array($this, "handleSelectTool"));
 		$this->toolobject = $listbox;
@@ -797,7 +787,7 @@ class toolPanel extends wizardPanel
 class _wxChoice extends wxChoice
 {
 	function __construct ($parent, $id) {
-		parent::__construct($parent, $id);
+		parent::__construct($parent, $id, wxDefaultPosition, new wxSize(119, -1));
 	}
 
 	function GetValue () {
@@ -823,8 +813,9 @@ class parmPanel extends wizardPanel
 
 	private static $selections = array();
 
-	function __construct ($parent, $nextButton, $usertools, $usertool) {
-		parent::__construct($parent, $nextButton, self::prompt);
+	function __construct ($usertools, $usertool) {
+		parent::__construct(self::prompt);
+		$this->enableScrolling();
 
 		list($this->groupname, $this->toolname) = $usertool;
 		$this->command = $usertools[$this->groupname][$this->toolname]["command"];
@@ -846,8 +837,8 @@ class parmPanel extends wizardPanel
 
 		foreach ($m[1] as $parm) {
 			if (preg_match('/([^=]*)=(.*)$/', $parm, $m2)) {
-				$statictext = new wxStaticText($this, $this->new_wxID(), $m2[1]);
-				$col1Sizer->Add($statictext, 0, wxALIGN_LEFT|wxTOP|wxBOTTOM, 9);
+				$statictext = new wxStaticText($this, $this->new_wxID(), $m2[1], wxDefaultPosition, new wxSize(240, -1));
+				$col1Sizer->Add($statictext, 0, wxTOP|wxBOTTOM, 9);
 
 				$selection = array_shift(self::$selections[$this->groupname][$this->toolname]);
 
@@ -890,7 +881,7 @@ class parmPanel extends wizardPanel
 
 				$parmObject->SetValue($selection);
 
-				$col2Sizer->Add($parmObject, 0, wxALIGN_LEFT|wxTOP|wxBOTTOM, 5);
+				$col2Sizer->Add($parmObject, 0, wxTOP|wxBOTTOM, 5);
 				$this->parmObjects[] = $parmObject;
 			}
 		}
@@ -924,8 +915,9 @@ class verifyPanel extends wizardPanel
 {
 	const prompt = "Verify that the user tool command should be run against the staff parts:";
 
-	function __construct ($parent, $nextButton, $SongData, $staffsubset, $fullcommand, $check) {
-		parent::__construct($parent, $nextButton, self::prompt);
+	function __construct ($SongData, $staffsubset, $fullcommand, $check) {
+		parent::__construct(self::prompt);
+		$this->enableScrolling();
 
 		$staffnames = array();
 
@@ -1184,12 +1176,12 @@ class resultsPanel extends wizardPanel
 	private $radiobuttonbaseid;
 	private $textDisp;
 
-	function __construct ($parent, $nextButton, $execResults, $panelHeight) {
-		parent::__construct($parent, $nextButton, self::prompt);
+	function __construct ($execResults) {
+		parent::__construct(self::prompt);
 
 		extract($execResults);
 
-		if (($exitcode == NWC2RC_SUCCESS) & !$stderr) {
+		if (($exitcode == NWC2RC_SUCCESS) && !$stderr) {
 			$td = new textdelta($stdin, $stdout);
 			$delta = $td->getreport();
 
@@ -1258,11 +1250,11 @@ class resultsPanel extends wizardPanel
 
 		//------------------------------------------------------------------------
 
-		$rowSizer = $this->newRow();
+		$rowSizer = $this->newRow(1);
 
-		$textDisp = new wxTextCtrl($this, $this->new_wxID(), "", wxDefaultPosition, new wxSize(-1, $panelHeight - 85),
+		$textDisp = new wxTextCtrl($this, $this->new_wxID(), "", wxDefaultPosition, wxDefaultSize,
 							wxTE_READONLY|wxTE_MULTILINE|wxTE_DONTWRAP);
-		$rowSizer->Add($textDisp, 1);
+		$rowSizer->Add($textDisp, 1, wxGROW);
 
 		$this->textDisp = $textDisp;
 
@@ -1290,8 +1282,6 @@ class mainDialog extends wxDialog
 	private $usertools = array();
 	private $SongData = null;
 
-	private $bitmap = null;
-
 	private $dialogSizer = null;
 	private $currentPanel = null;
 	private $pagePanel = null;
@@ -1314,10 +1304,11 @@ class mainDialog extends wxDialog
 	function __construct () {
 		parent::__construct(null, -1, "Run User Tool");
 
-		$this->SetIcons(new iconBundle());
+		$bundle = new iconBundle();
+		$this->SetIcons($bundle);
 
-		$this->bitmap = new logoBitmap();
-		$this->bitmapHeight = $this->bitmap->GetHeight();
+		$bitmap = new logoBitmap();
+		wizardPanel::$size = new wxSize(400, $bitmap->GetHeight());
 
 		$wxID = wxID_HIGHEST;
 
@@ -1325,27 +1316,26 @@ class mainDialog extends wxDialog
 		$this->SetSizer($this->dialogSizer);
 
 		//------------------------------------------------------------------------
-
 		// first row is RUT logo and page panel
 
 		$rowSizer = new wxBoxSizer(wxHORIZONTAL);
 		$this->dialogSizer->Add($rowSizer, 0, wxGROW);
 
-		$staticbitmap = new wxStaticBitmap($this, ++$wxID, $this->bitmap);
+		$staticbitmap = new wxStaticBitmap($this, ++$wxID, $bitmap);
 		$rowSizer->Add($staticbitmap);
 
-		$this->pagePanel = new wxPanel($this, ++$wxID, wxDefaultPosition, new wxSize(RUT_PAGEWIDTH, -1));
+		$this->pagePanel = new wxPanel($this, ++$wxID, wxDefaultPosition, wizardPanel::$size);
 		$rowSizer->Add($this->pagePanel, 0, wxGROW);
+		wizardPanel::$parent = $this->pagePanel;
 
 		//------------------------------------------------------------------------
-
-		// second row is button set
+		// second row is status msg and button set
 
 		$rowSizer = new wxStaticBoxSizer(wxHORIZONTAL, $this);
 		$this->dialogSizer->Add($rowSizer, 0, wxGROW);
 
 		$this->statusText = new wxStaticText($this, ++$wxID, "");
-		$rowSizer->Add($this->statusText, 0, wxALIGN_LEFT|wxALL, 5);
+		$rowSizer->Add($this->statusText, 0, wxALL, 5);
 
 		$rowSizer->AddStretchSpacer();
 
@@ -1356,9 +1346,10 @@ class mainDialog extends wxDialog
 		$this->nextButton = new wxButton($this, ++$wxID, "Next >");
 		$rowSizer->Add($this->nextButton, 0, wxRIGHT, 25);
 		$this->Connect($wxID, wxEVT_COMMAND_BUTTON_CLICKED, array($this, "DoNext"));
+		wizardPanel::$nextButton = $this->nextButton;
 
 		$this->cancelButton = new wxButton($this, wxID_CANCEL);
-		$rowSizer->Add($this->cancelButton, 0, wxALIGN_RIGHT);
+		$rowSizer->Add($this->cancelButton);
 		$this->Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED, array($this, "DoCancel"));
 
 		//------------------------------------------------------------------------
@@ -1391,27 +1382,27 @@ class mainDialog extends wxDialog
 		switch ($page) {
 			case "editstaffsubset":
 				$this->setupCtrlPanel("hidden", "inactive", "active", "");
-				$this->currentPanel = new staffPanel($this->pagePanel, $this->nextButton, $this->SongData, $this->staffsubset);
+				$this->currentPanel = new staffPanel($this->SongData, $this->staffsubset);
 				break;
 
 			case "editusertool":
 				$this->setupCtrlPanel("active", "inactive", "active", "");
-				$this->currentPanel = new toolPanel($this->pagePanel, $this->nextButton, $this->usertools, $this->usertool);
+				$this->currentPanel = new toolPanel($this->usertools, $this->usertool);
 				break;
 
 			case "editfullcommand":
 				$this->setupCtrlPanel("active", "inactive", "active", "");
-				$this->currentPanel = new parmPanel($this->pagePanel, $this->nextButton, $this->usertools, $this->usertool);
+				$this->currentPanel = new parmPanel($this->usertools, $this->usertool);
 				break;
 
 			case "editverification":
 				$this->setupCtrlPanel("active", "inactive", "active", "");
-				$this->currentPanel = new verifyPanel($this->pagePanel, $this->nextButton, $this->SongData, $this->staffsubset, $this->fullcommand, $this->showchanges);
+				$this->currentPanel = new verifyPanel($this->SongData, $this->staffsubset, $this->fullcommand, $this->showchanges);
 				break;
 
 			case "editresults":
 				$this->setupCtrlPanel("active", "inactive", "active", null);
-				$this->currentPanel = new resultsPanel($this->pagePanel, $this->nextButton, $this->execresults, $this->bitmapHeight);
+				$this->currentPanel = new resultsPanel($this->execresults);
 				break;
 
 			default:
@@ -1569,8 +1560,12 @@ class mainDialog extends wxDialog
 						$GotArgUserToolAlready = true;
 
 						// run this user tool, but skip over it if no staffs selected
-						if ($this->staffsubset)
-							$nextstate = "getfullcommand";
+						if ($this->staffsubset) {
+							if ($this->usertool[1])
+								$nextstate = "getfullcommand";
+							else
+								$nextstate = "editusertool";
+						}
 						else
 							$nextstate = "getstaffsubset";
 					}
@@ -1708,7 +1703,7 @@ class mainDialog extends wxDialog
 		$exitcode = $this->runCommand($this->fullcommand, $stdin, $stdout, $stderr, $compress);
 		$this->execresults = compact("stdin", "stdout", "stderr", "exitcode");
 
-		if (($exitcode == NWC2RC_SUCCESS) & !$stderr) {
+		if (($exitcode == NWC2RC_SUCCESS) && !$stderr) {
 			$this->SongData->PutClipText($staffindex, $stdout);
 			return false;
 		}
@@ -1723,9 +1718,9 @@ class mainDialog extends wxDialog
 
 		list($property, $value) = $builtinsubsets[$subsetname];
 
-		foreach ($this->SongData->StaffData as $index => $StaffData)
+		foreach ($this->SongData->StaffData as $staffindex => $StaffData)
 			if (!$property || ($StaffData->HeaderValues["StaffProperties"][$property] == $value))
-				$staffsubset[] = $index;
+				$staffsubset[] = $staffindex;
 
 		return $staffsubset;
 	}
@@ -1755,6 +1750,10 @@ class mainDialog extends wxDialog
 		$toolname = strtok("");
 		if (isset($this->usertools[$groupname][$toolname]))
 			return array($groupname, $toolname);
+
+		// check third if $toolname was just a group name (no tool specified)
+		if (!$toolname && isset($this->usertools[$groupname]))
+				return array($groupname, null);
 
 		$this->fail("RUT: Unrecognized user tool: $groupname:$toolname");
 	}

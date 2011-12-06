@@ -66,5 +66,5 @@ This product includes PHP software, freely available from <http://www.php.net/so
 License Terms
 This repository includes works protected by copyright and commercial redistribution is not permitted without the prior written consent of NoteWorthy Software, Inc. and the other owners of components included in this package. This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software. 
  
-Copyright © 2010 by NoteWorthy Software, Inc.
+Copyright © 2011 by NoteWorthy Software, Inc.
 All Rights Reserved
