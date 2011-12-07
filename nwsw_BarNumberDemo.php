@@ -53,7 +53,7 @@ foreach ($clip->Items as $item) {
 			continue;
 			}
 		}
-	else if (in_array($o->GetObjType(),array('Note','Chord','RestChord','Rest'))) {
+	else if (in_array($o->GetObjType(),array('Note','Chord','RestChord','Rest','RestMultiBar'))) {
 		if (count($pendingOutput)) {
 			if ($priorBarIndex >= 0) {
 				$pendingOutput[$priorBarIndex] .= "|Text|Text:\"Bar ".$PlayContext->NextBarNum."\"|Font:StaffBold|Pos:6|Wide:Y|Placement:AsStaffSignature|Visibility:Never\n";

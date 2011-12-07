@@ -1,19 +1,20 @@
 <?php
 /*******************************************************************************
-nwsw_Visibility Version 1.01
+nwsw_Visibility Version 1.1
 
 This script enables fast alteration of the visibility property for selected
 items.
 
-Copyright © 2007 by NoteWorthy Software, Inc.
+Copyright © 2011 by NoteWorthy Software, Inc.
 All Rights Reserved
 
 History:
+[2011-12-06] Version 1.10 - Update comment with new Visibility opts
 [2007-01-03] Version 1.01 - Inclusion in starter kit
 [2006-07-11] Version 1.00 - Initial release
 *******************************************************************************/
 //
-//AdvisoryInvocation:"/visibility=<PROMPT:Set Visibility to:=|Default|Always|TopStaff|Never|>" "/skip=<PROMPT:Skip:=|None|Bar|Bar,Text|Bar,Text,Flow,Ending|>"
+//AdvisoryInvocation:"/visibility=<PROMPT:Set Visibility to:=|Default|Always|TopStaff|SingleStaff|MultiStaff|Never|>" "/skip=<PROMPT:Skip:=|None|Bar|Bar,Text|Bar,Text,Flow,Ending|>"
 
 require_once("lib/nwc2clips.inc");
 
