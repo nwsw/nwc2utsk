@@ -30,7 +30,7 @@ function SaveRestoreContext($o)
 			$this->Ending1Context = array();
 			foreach($varlist as $v) $this->Ending1Context[$v] = $this->$v;
 			}
-		else if ($this->SeenFirstEnding && !isset($endings[1])) {
+		else if (!empty($endings) && $this->SeenFirstEnding && !isset($endings[1])) {
 			foreach($varlist as $v) $this->$v = $this->Ending1Context[$v];
 			}
 		}

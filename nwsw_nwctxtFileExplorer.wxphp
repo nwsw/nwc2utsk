@@ -1,6 +1,6 @@
 <?php
 define("APPNAME","nwctxt File Explorer");
-define("APPVERSION","0.1");
+define("APPVERSION","1.0");
 define("APPDESC",
 <<<___EODESC
 This tool shows all of the "File Text (nwctxt)" that is sent from 
@@ -206,7 +206,7 @@ class nwcut_MainWindow extends wxDialog
 				$playIndex = current($this->staffIndexes);
 				$PlayContext = new NWC2PlayContext();
 				while ($playIndex < $linenum) {
-					$o = new NWC2ClipItemWithPitchPos($nwctxtLines[$playIndex++]);
+					$o = new NWC2ClipItemWithPitchPos($nwctxtLines[$playIndex++],true);
 					$PlayContext->UpdateContext($o);
 					}
 

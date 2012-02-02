@@ -1,5 +1,5 @@
 <?php
-function NWC2ClipLibVersion() {return "2.494";}
+function NWC2ClipLibVersion() {return "2.5";}
 /*******************************************************************************
 This is a support API for interfacing to NWC2 clip text. A forum dedicated to 
 NWC2 user tools can be found here:

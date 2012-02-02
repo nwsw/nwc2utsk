@@ -13,6 +13,7 @@
 //  2006-08-11 1.2 nwsw Added support for escaping commas in the "<comparison>" section, small code clean up
 //  2009-10-11 1.5 nwsw Clean up PHP5 warnings
 //  2010-07-14 2.0 nwsw Support usage against entire file text 
+//  2011-12-19 2.1 nwsw Support most nwctxt objects 
 // 
 // For documentation, see help_msg_and_exit (down a few lines)
 
@@ -285,8 +286,8 @@ while (!gzeof($zin))
 		continue;
 		}
 
-	if (preg_match('/^\|(Editor|SongInfo|PgSetup|Font|PgMargins|AddStaff|StaffProperties|StaffInstrument|Lyrics)/',$item)) {
-		// Higher level objects not included in the staff notation are skipped
+	if (preg_match('/^\|(AddStaff|Lyric)/',$item)) {
+		// Structural objects are skipped
 		gzwrite($zout,$item);
 		continue;
 		}
