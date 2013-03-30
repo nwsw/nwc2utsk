@@ -3,6 +3,8 @@
 // -----------------------------------------------------------------------
 class NWC2NotePitchPos {
 // -----------------------------------------------------------------------
+static function GetPositionFromStr($s) { return preg_match('/^[\#bnxv]{0,1}(\-{0,1}[0-9]+)/',$s,$m) ? $m[2] : 0; }
+
 var $Accidental="";
 var $Position=0;
 var $Notehead="";

@@ -28,8 +28,6 @@ if (count($clip->Items) < 2) trigger_error("Please select more than one item to 
 
 if ($clip->Mode != "Single") trigger_error("Clip mode of {$clip->Mode} is not supported",E_USER_ERROR);
 
-if ($clip->Version < "2.5") trigger_error("The notation clip uses an unknown format version ({$clip->Version}), so it may not be processed correctly",E_USER_NOTICE);
-
 // ----------------------------------------------------------------------------
 // G L O B A L S
 //

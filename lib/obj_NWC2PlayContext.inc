@@ -50,12 +50,22 @@ function GetPlayPitchShift() { return (12 * $this->GetOctaveShift()) + $this->Tr
 
 function GetNotePitchName($notepitchObj) { return $notepitchObj->GetNoteName($this->Clef); }
 
+static function GetTiePosFromStr($s)
+{
+	return substr($s,1);
+}
+
 function GetNotePitchAccidental($notepitchObj)
 {
-	$n = $notepitchObj->GetNoteName($this->Clef);
 	$a = $notepitchObj->Accidental;
-	if (!$a) $a = NWC2NotePitchPos::$nwcAccidentals[$this->RunKey[$n]+2];
-	return $a;
+	if ($a) return $a;
+
+	foreach ($this->Ties as $tiekey => $tie) {
+		if (NWC2PlayContext::GetTiePosFromStr($tie) == $notepitchObj->Position) return substr($tie,0,1);
+		}
+		
+	$n = $notepitchObj->GetNoteName($this->Clef);
+	return NWC2NotePitchPos::$nwcAccidentals[$this->RunKey[$n]+2];
 }
 
 function GetScientificPitchOctave($notepitchObj)
@@ -100,7 +110,7 @@ function UpdateContext($o)
 			$notepitchObj = new NWC2NotePitchPos($notepitchTxt);
 
 			$notename = $notepitchObj->GetNoteName($this->Clef);
-			$noteacc = $notepitchObj->Accidental;
+			$noteacc = $this->GetNotePitchAccidental($notepitchObj);
 			if (!$noteacc) $noteacc = NWC2NotePitchPos::$nwcAccidentals[$this->RunKey[$notename]+2];
 			$tieKey = $noteacc.$notepitchObj->Position;
 

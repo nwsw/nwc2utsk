@@ -22,7 +22,9 @@ function NWC2ClipItem($itemtext,$remapFakes=false)
 			switch (NWC2ClassifyOptTag($this->ObjType,$tag)) {
 				case NWC2OPT_TEXT:
 					if (preg_match('/^\"(.*)\"$/',$data,$m)) $data = $m[1];
-					$data = stripcslashes($data);
+					// For legacy files, we need to convert \\ into \], which is the new construct for the backslash.
+					// This avoids double detection/replacement of \ characters adjacent to other matching characters.
+					$data = str_replace(array('\\\\','\\\'','\\\"','\\r','\\n','\\t','\\}','\\|','\\]'), array('\\]','\'','\"',"\r","\n","\t","|","|",'\\'),$data);
 					break;
 
 				case NWC2OPT_LIST:
@@ -85,7 +87,8 @@ function ReconstructClipText()
 		$s .= "|$k:";
 		$optCounter = 0;
 		if (is_string($v)) {
-			$v2 = addcslashes($v,"\r\n\t\\\"\'|");
+			// First encode all but '|' as cslashes, then convert \ and | to special combinations
+			$v2 = str_replace(array('\\\\','|'), array('\\]','\\}'),addcslashes($v,"\r\n\t\\\"\'"));
 			if ($c == NWC2OPT_TEXT) $s .= "\"$v2\"";
 			else $s .= $v2;
 			}
