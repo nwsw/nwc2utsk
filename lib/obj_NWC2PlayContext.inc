@@ -101,8 +101,7 @@ function UpdateContext($o)
 		if (empty($notes)) $notes = $notes2;
 		else if (!empty($notes2)) {
 			// Merge the stem down notes with the stem up notes
-			if (isset($o->Opts["Stem"]) && ($o->Opts["Stem"] == "Up")) $notes = array_merge($notes2,$notes);
-			else $notes = array_merge($notes,$notes2);
+			$notes = (nw_aafield($o->Opts["Opts"],"Stem") == "Up") ? array_merge($notes2,$notes) : array_merge($notes,$notes2);
 			}
 
 		$RunKey_Changes = array();
