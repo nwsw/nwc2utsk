@@ -110,7 +110,6 @@ function UpdateContext($o)
 
 			$notename = $notepitchObj->GetNoteName($this->Clef);
 			$noteacc = $this->GetNotePitchAccidental($notepitchObj);
-			if (!$noteacc) $noteacc = NWC2NotePitchPos::$nwcAccidentals[$this->RunKey[$notename]+2];
 			$tieKey = $noteacc.$notepitchObj->Position;
 
 			$runningTieKey = array_search($tieKey,$this->Ties);

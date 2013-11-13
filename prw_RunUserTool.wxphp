@@ -2,7 +2,7 @@
 
 /**************************************************************************************************
 
-Run User Tool - Version 1.2
+Run User Tool - Version 1.3
 
 This is a special user tool in that it does not perform any action itself, but
 instead can perform multiple actions, by running other user tools.  It is used
@@ -367,6 +367,9 @@ class NWC2UserTools {
 				else {
 					$toolflags = 0;
 				}
+
+				$lc_toolexec = strtolower($toolexec);
+				if ((strpos($lc_toolexec,".exe") === FALSE) && (strpos($lc_toolexec,".lua") !== FALSE)) $toolexec = "nwc2.exe -nwcut ".$toolexec;
 
 				$usertools[$section][$toolname]["command"] = $toolexec;
 				$usertools[$section][$toolname]["cmdflags"] = $toolflags;

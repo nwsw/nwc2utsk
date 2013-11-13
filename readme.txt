@@ -1,7 +1,7 @@
 User Tool Starter Kit
-- for NoteWorthy Composer 2.5
+- for NoteWorthy Composer 2.51
 
-This package installs a set of built-in tools for use with the User Tool command in NoteWorthy Composer 2.5. After installing this package, several new built-in tools groups will be available from the User Tool command (Alt+F8), including .Starter Tools, .File Tools, and .Developer Tools groups. 
+This package installs a set of tools for use with the User Tool command in NoteWorthy Composer 2.51. After installing this package, several new tools groups will be available from the User Tool command (Alt+F8), including .Starter Tools, .File Tools, and .Developer Tools groups. 
 
 Built-in tools that are installed include:
 
@@ -16,9 +16,6 @@ This script allows you to conditionally modify note pitch/position information.
 
 Shape Notes (nwsw)
 This script allows you to modify a selection, or all visible parts, to use shape notes.
-
-Retrograde (nwsw)
-This script is used to retrograde selected notation in a staff.
 
 Bar Number Demo (nwsw)
 This script shows how to add bar lines to selected notation in a staff.
@@ -59,12 +56,12 @@ Targetted at script writers, this script shows you all of the PHP classes and me
 Variable Dump for Developers (nwsw)
 Targetted at script writers, this script enables a developer to explore the array tree built by the nwc2clips.inc library included in this package.
 
-These scripts require a recent release of NoteWorthy Composer 2.5. You must be a licensed user of NoteWorthy Composer 2.5 in order to use tools such as these. After this package is installed, you can press Alt+F8 inside the NWC editor to access the new scripting tools. Most of the tools appear in the group named .Starter Tools.
+These scripts require NoteWorthy Composer 2.51. You must be a licensed user of NoteWorthy Composer 2.5 in order to use tools such as these. After this package is installed, you can press Alt+F8 inside the NWC editor to access the new scripting tools. Most of the tools appear in the group named .Starter Tools.
 
 This product includes PHP software, freely available from <http://www.php.net/software/>
 
 License Terms
 This repository includes works protected by copyright and commercial redistribution is not permitted without the prior written consent of NoteWorthy Software, Inc. and the other owners of components included in this package. This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software. 
  
-Copyright © 2011 by NoteWorthy Software, Inc.
+Copyright © 2013 by NoteWorthy Software, Inc.
 All Rights Reserved

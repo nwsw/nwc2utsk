@@ -1,5 +1,5 @@
 <?php
-function NWC2ClipLibVersion() {return "2.5";}
+function NWC2ClipLibVersion() {return "2.51";}
 /*******************************************************************************
 This is a support API for interfacing to NWC2 clip text. A forum dedicated to 
 NWC2 user tools can be found here:
@@ -7,7 +7,7 @@ NWC2 user tools can be found here:
 NoteWorthy Composer > User Tools
 http://my.noteworthysoftware.com/?board=7.0
 
-Copyright © 2011 by NoteWorthy Software, Inc.
+Copyright © 2013 by NoteWorthy Software, Inc.
 All Rights Reserved
 *******************************************************************************/
 
