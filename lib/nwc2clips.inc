@@ -7,7 +7,7 @@ NWC2 user tools can be found here:
 NoteWorthy Composer > User Tools
 http://my.noteworthysoftware.com/?board=7.0
 
-Copyright © 2013 by NoteWorthy Software, Inc.
+Copyright © 2014 by NoteWorthy Software, Inc.
 All Rights Reserved
 *******************************************************************************/
 
