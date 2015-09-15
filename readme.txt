@@ -60,6 +60,11 @@ These scripts require NoteWorthy Composer 2.75. You must be a licensed user of N
 
 This product includes PHP software, freely available from <http://www.php.net/software/>
 
+The included PHP software requires the following package:
+
+Microsoft C++ 2008 Redistributable (x86)
+<http://www.microsoft.com/en-us/download/details.aspx?id=29>
+
 License Terms
 This repository includes works protected by copyright and commercial redistribution is not permitted without the prior written consent of NoteWorthy Software, Inc. and the other owners of components included in this package. This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software. 
  
