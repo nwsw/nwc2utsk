@@ -14,6 +14,7 @@
 //  2009-10-11 1.5 nwsw Clean up PHP5 warnings
 //  2010-07-14 2.0 nwsw Support usage against entire file text 
 //  2011-12-19 2.1 nwsw Support most nwctxt objects 
+//  2015-09-15 2.75 nwsw Support User.<objtype> expression for <type>
 // 
 // For documentation, see help_msg_and_exit (down a few lines)
 
@@ -39,7 +40,7 @@ echo <<<__EOHELPTEXT
 Usage: php global_mod.php <type>,<comparison>,... <action>
 
 Where:
-<type> is eg Note, Chord, Clef, Key, TimeSig, Bar, RestChord, Rest, Dynamic etc
+<type> is eg Note, Chord, Clef, Key, TimeSig, Bar, RestChord, Rest, Dynamic, User, User:objtype etc
 <comparison> is of form
 	<opt>, meaning the named option is present or
 	!<opt>, meaning the option is absent
@@ -67,6 +68,9 @@ or to modify all tempos to slow by 10%
 
 or to hide all tempo markings
 	php global_mod.php Tempo Visibility=Never
+	
+or to move all GuitarChord.ms objects to a new position
+	php global_mod.php User:GuitarChord.ms Pos=12
 	
 Known issues: altering positions might not work with accidentals.
 __EOHELPTEXT;
@@ -102,6 +106,7 @@ $gm_comparisons = array("<=", "<", "==", ">=", ">", "!=") ;
 class gm_match 
 {
 	var $maintype = "" ;		// string, eg Note, Chord, Tempo
+	var $subtype = "" ;		// string, eg ChordPlay.nw, GuitarChord.ms, etc.
 	var $present = array( ) ;	// optional array of Opt names, which must be present in the Clip object for Matches($o) to return true
 	var $comparisons = array( ) ;	// comparison, string representation of comparison eg "Pos" => "=="
 	var $comparesTo = array( ) ;	// values to compare to, eg "Pos" => 30, or "Dur" => "Whole"
@@ -111,7 +116,10 @@ class gm_match
 		global $gm_comparisons;
 	
 		$matchlist = preg_split('/(?<!\\\)\,/', $matchtext) ;
-		$this->maintype = array_shift($matchlist) ;
+		$typeexpression = explode(':', array_shift($matchlist), 2) ;
+		$this->maintype = array_shift($typeexpression) ;
+		if ($typeexpression) $this->subtype = array_shift($typeexpression) ;
+
 		foreach( $matchlist as $match )	// go through remainder of match criteria
 		{
 			$match = str_replace('\\,',',',$match);
@@ -134,6 +142,8 @@ class gm_match
 	// an option was named with a comparison, it must compare true. Any failures return false. It's a hard world.
 	{
 		if ($o->GetObjType() != $this->maintype) return FALSE ;
+		if (!empty($this->subtype) && ($this->subtype != $o->GetUserObjType())) return FALSE ;
+
 		foreach ($this->present as $presence => $val)   // check for matching presence or absence
 			if ($presence{0} == '!') { if (gm_getTaggedOpt(substr($presence,1),$o)!==FALSE) return FALSE ; }
 			else if (gm_getTaggedOpt($presence,$o)===FALSE) return FALSE ;

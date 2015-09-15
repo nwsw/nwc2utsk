@@ -14,6 +14,9 @@ function NWC2ClipItem($itemtext,$remapFakes=false)
 	$this->ObjType = array_shift($o);
 	$isFake = ($this->ObjType == "Fake");
 	if ($remapFakes && $isFake) $this->ObjType = array_shift($o);
+
+	if ($this->ObjType == "User") $this->UserType = array_shift($o);
+
 	foreach ($o as $v) {
 		if (preg_match('/^([0-9a-z\-\_]+):(.*)/i',$v,$m)) {
 			$tag = $m[1];
@@ -67,6 +70,12 @@ function GetTaggedOptAsArray($tag,$nonexistent=false) {
 function IsFake() {
 	return ($this->ObjType == "Fake") || isset($this->Opts["Fake"]);
 	}
+function IsUserObj() {
+	return ($this->ObjType == "User");
+	}
+function GetUserObjType() {
+	return $this->IsUserObj() ? $this->UserType : false;
+	}
 function IsContextInfo() {
 	return $this->IsFake() || ($this->ObjType == "Context");
 	}
@@ -76,6 +85,8 @@ function ReconstructClipText()
 	if ($this->IsContextInfo()) return "|Fake";
 
 	$s = "|".$this->ObjType;
+	if ($this->IsUserObj()) $s .= "|".$this->UserType;
+
 	foreach ($this->Opts as $k => $v) {
 		$c = NWC2ClassifyOptTag($this->ObjType,$k);
 

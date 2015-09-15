@@ -1,13 +1,13 @@
 <?php
-function NWC2ClipLibVersion() {return "2.51";}
+function NWC2ClipLibVersion() {return "2.75";}
 /*******************************************************************************
 This is a support API for interfacing to NWC2 clip text. A forum dedicated to 
 NWC2 user tools can be found here:
 
 NoteWorthy Composer > User Tools
-http://my.noteworthysoftware.com/?board=7.0
+https://forum.noteworthycomposer.com/?board=7.0
 
-Copyright © 2014 by NoteWorthy Software, Inc.
+Copyright © 2015 by NoteWorthy Software, Inc.
 All Rights Reserved
 *******************************************************************************/
 
@@ -89,7 +89,7 @@ function NWC2ClassifyObjType($ObjType)
 	if (!$ObjType) return NWC2OBJTYP_ERROR;
 	$boundedOTyp = "|$ObjType|";
 	// Speed optimization: Check for most common notation types first using strpos
-	if (strpos("_|Note|Chord|Bar|Rest|Text|Dynamic|Clef|Key|TimeSig|",$boundedOTyp)) return NWC2OBJTYP_STAFFNOTATION;
+	if (strpos("_|Note|Chord|Bar|Rest|Spacer|Marker|Text|Dynamic|Clef|Key|TimeSig|User|",$boundedOTyp)) return NWC2OBJTYP_STAFFNOTATION;
 	if (strpos("_|Locale|Editor|SongInfo|PgSetup|Font|PgMargins|",$boundedOTyp)) return NWC2OBJTYP_FILEPROPERTY;
 	if (strpos("_|AddStaff|StaffProperties|StaffInstrument|",$boundedOTyp)) return NWC2OBJTYP_STAFFPROPERTY;
 	if (substr($ObjType,0,5) == "Lyric") return NWC2OBJTYP_STAFFLYRIC;
@@ -107,6 +107,8 @@ function NWC2ClassifyOptTag($ObjType,$Tag)
 {
 	// For speed, classify all possible note tags first
 	$b_Tag = "|$Tag|";
+
+	if ($ObjType == "User") return NWC2OPT_RAW;
 
 	if (strpos("_|Opts|Dur|Dur2|Endings|",$b_Tag)) return NWC2OPT_ASSOCIATIVE;
 
