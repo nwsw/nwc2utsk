@@ -28,7 +28,7 @@ function NWC2ClipItem($itemtext,$remapFakes=false)
 					if (preg_match('/^\"(.*)\"$/',$data,$m)) $data = $m[1];
 					// For legacy files, we need to convert \\ into \], which is the new construct for the backslash.
 					// This avoids double detection/replacement of \ characters adjacent to other matching characters.
-					$data = str_replace(array('\\\\','\\\'','\\\"','\\r','\\n','\\t','\\}','\\|','\\]'), array('\\]','\'','\"',"\r","\n","\t","|","|",'\\'),$data);
+					$data = str_replace(array('\\\\','\\\'','\\"','\r','\n','\t','\}','\|','\]'), array('\\]','\'','"',"\r","\n","\t","|","|",'\\'),$data);
 					break;
 
 				case NWC2OPT_LIST:
@@ -100,7 +100,7 @@ function ReconstructClipText()
 		$optCounter = 0;
 		if (is_string($v)) {
 			// First encode all but '|' as cslashes, then convert \ and | to special combinations
-			$v2 = str_replace(array('\\\\','|'), array('\\]','\\}'),addcslashes($v,"\r\n\t\\\"\'"));
+			$v2 = str_replace(array('\\\\','|'), array('\]','\}'),addcslashes($v,"\r\n\t\\\"\'"));
 			if (($c == NWC2OPT_TEXT) || (($c == NWC2OPT_RAW) && preg_match('/[\s"\'\|\\\\]/',$v2)))
 				$s .= "\"$v2\"";
 			else
