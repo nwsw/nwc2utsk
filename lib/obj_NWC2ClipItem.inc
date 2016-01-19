@@ -101,7 +101,10 @@ function ReconstructClipText()
 		if (is_string($v)) {
 			// First encode all but '|' as cslashes, then convert \ and | to special combinations
 			$v2 = str_replace(array('\\\\','|'), array('\]','\}'),addcslashes($v,"\r\n\t\\\"\'"));
-			if (($c == NWC2OPT_TEXT) || (($c == NWC2OPT_RAW) && preg_match('/[\s"\'\|\\\\]/',$v2)))
+			if ($c == NWC2OPT_TEXT)
+				$s .= "\"$v2\"";
+			else if (!empty($this->UserType) && preg_match('/[\s"\'\|\\\\]/',$v2))
+				// this is not really necessary, but is done to match NWC behaviour
 				$s .= "\"$v2\"";
 			else
 				$s .= $v2;

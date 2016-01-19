@@ -5,9 +5,13 @@ $clip = new NWC2Clip('php://stdin');
 
 foreach ($clip->Items as $item) {
 	$o = new NWC2ClipItem($item);
-	echo "Ref: $item";
-	echo "New: ".$o->ReconstructClipText()."\n";
-	unset($o);
+
+	if ($o->IsContextInfo()) continue;
+
+	$origLine = trim($item);
+	$newLine = $o->ReconstructClipText();
+
+	if ($newLine != $origLine) echo "Ref: $origLine\nNew: $newLine\n\n";
 	}
 
 $usermsg = <<<__EOMSG
