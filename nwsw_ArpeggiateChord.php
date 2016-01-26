@@ -5,7 +5,7 @@ nwsw_ArpeggiateChord.php Version 2
 This script will arpeggiate selected chords using the Arpeggio.ms object.
 
 Prompting can be added with the following command line:
-"/duration=<PROMPT:Select a duration:=|8th|16th|32nd>" "/sequence=<PROMPT:Select an arpeggio order:=|up|down>"
+"/duration=<PROMPT:Select a duration:=#[8,128]>" "/sequence=<PROMPT:Select an arpeggio order:=|up|down>"
 
 Copyright © 2016 by NoteWorthy Software, Inc.
 All Rights Reserved
@@ -29,19 +29,17 @@ function getBaseDur($o,$dur='Dur')
 	return false;
 }
 
-// ARPEGGIO_DURATION can be one of 8th, 16th, 32nd, 64th
-$ARPEGGIO_DURATION = '32nd';
+// ARPEGGIO_DURATION can be either a number, or one of 8th, 16th, or 32nd from legacy setups
+$ARPEGGIO_DURATION = 32;
 $ARPDURConvert = array('Whole'=>1,'Half'=>2,'4th'=>4,'8th'=>8,'16th'=>16,'32nd'=>32,'64th'=>64);
 //
 // Const_ARPEGGIO_SEQUENCE can be one of up or down
 $ARPEGGIO_SEQUENCE = 'up';
 
 foreach ($argv as $k => $v) {
-	if (preg_match('/^\/duration\=(.*)$/i',$v,$m)) $ARPEGGIO_DURATION = $m[1];
+	if (preg_match('/^\/duration\=([0-9]+)/i',$v,$m)) $ARPEGGIO_DURATION = intval($m[1]);
 	else if (preg_match('/^\/sequence\=(.*)$/i',$v,$m)) $ARPEGGIO_SEQUENCE = $m[1];
 	}
-
-$requestedRate = nw_aafield($ARPDURConvert,$ARPEGGIO_DURATION,32);
 
 $clip = new NWC2Clip('php://stdin');
 
@@ -91,7 +89,7 @@ foreach ($clip->Items as $item) {
 		if ($ARPEGGIO_SEQUENCE == "down") $userObj->Opts['Dir'] = 'down';
 		
 		$chordDurMinRate = nw_aafield($ARPDURConvert,$baseDur,32) * 4;
-		$userObj->Opts['Rate'] = max($chordDurMinRate,$requestedRate);
+		$userObj->Opts['Rate'] = max($chordDurMinRate,$ARPEGGIO_DURATION);
 
 		echo $userObj->ReconstructClipText()."\n";
 
