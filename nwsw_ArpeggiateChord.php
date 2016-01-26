@@ -20,17 +20,28 @@ HISTORY:
 *******************************************************************************/
 require_once("lib/nwc2clips.inc");
 
+function getBaseDur($o,$dur='Dur')
+{
+	$d = $o->GetTaggedOpt($dur);
+	if (!$d || !is_array($d)) return false;
+
+	foreach($d as $k=>$v) if (strpos('_|Whole|Half|4th|8th|16th|32nd|64th|',$k)) return $k;
+	return false;
+}
+
 // ARPEGGIO_DURATION can be one of 8th, 16th, 32nd, 64th
-$ARPEGGIO_DURATION = "8th";
-$ARPDURConvert = array('8th'=>8,'16th'=>16,'32nd'=>32,'64th'=>64);
+$ARPEGGIO_DURATION = '32nd';
+$ARPDURConvert = array('Whole'=>1,'Half'=>2,'4th'=>4,'8th'=>8,'16th'=>16,'32nd'=>32,'64th'=>64);
 //
 // Const_ARPEGGIO_SEQUENCE can be one of up or down
-$ARPEGGIO_SEQUENCE = "up";
+$ARPEGGIO_SEQUENCE = 'up';
 
 foreach ($argv as $k => $v) {
 	if (preg_match('/^\/duration\=(.*)$/i',$v,$m)) $ARPEGGIO_DURATION = $m[1];
 	else if (preg_match('/^\/sequence\=(.*)$/i',$v,$m)) $ARPEGGIO_SEQUENCE = $m[1];
 	}
+
+$requestedRate = nw_aafield($ARPDURConvert,$ARPEGGIO_DURATION,32);
 
 $clip = new NWC2Clip('php://stdin');
 
@@ -39,22 +50,39 @@ if (count($clip->Items) < 1) trigger_error("Please select at least one chord",E_
 echo $clip->GetClipHeader()."\n";
 
 $ArpeggioAllowedHere = true;
+$WarnAboutInboundTie = false;
+$PlayContext = new NWC2PlayContext();
+
 foreach ($clip->Items as $item) {
-	$o = new NWC2ClipItem($item);
+	$o = new NWC2ClipItem($item,true);
+
+	if ($o->IsContextInfo()) {
+		$PlayContext->UpdateContext($o);
+		continue;
+		}
+
+	$baseDur = getBaseDur($o);
+
 	//
 	// If this is a non-grace chord and is not preceded by a grace note,
 	// and it is larger than an 8th note in duration, then add an arpeggio
-	if (($o->GetObjType() == "Chord") && 
+	if ($ArpeggioAllowedHere &&
+		($o->GetObjType() == "Chord") && 
 		!isset($o->Opts["Dur"]["Grace"]) &&
-		(count(array_intersect(array_keys($o->Opts["Dur"]),array("Whole","Half","4th"))) > 0) &&
-		$ArpeggioAllowedHere)
-		{
+		strpos('_|Whole|Half|4th|8th|16th|',"|$baseDur|")
+		) {
 		// Create the Arpeggio.ms object, then update its properties as needed
 
-		$userObj = new NWC2ClipItem('|User|Arpeggio.ms|Pos:-4|Class:Standard|Dir:up|Rate:16|Color:0|Visibility:Default');
+		$userObj = new NWC2ClipItem('|User|Arpeggio.ms|Pos:0|Class:Standard|Dir:up|Rate:16|Color:0|Visibility:Default');
 
-		$chordnotes = $o->GetTaggedOpt("Pos");
-		$userObj->Opts['Pos'] = $chordnotes[0]['Position'];
+		$chordnotes = $o->GetTaggedOptAsArray("Pos",array());
+		$chordnotes2 = $o->GetTaggedOptAsArray("Pos2");
+		if ($chordnotes2) $chordnotes = (nw_aafield($o->Opts["Opts"],"Stem") == "Up") ? array_merge($chordnotes2,$chordnotes) : array_merge($chordnotes,$chordnotes2);
+		foreach ($chordnotes as $i => $notepitchtxt) {
+			$notepitchObj = new NWC2NotePitchPos($notepitchtxt);
+			if ($i == 0) $userObj->Opts['Pos'] = $notepitchObj->Position;
+			if ($PlayContext->IsTieReceiver($notepitchObj)) $WarnAboutInboundTie = true;
+			}
 		
 		foreach (array('Color','Visibility') as $baseprop) {
 			if (!empty($o->Opts[$baseprop])) $userObj->Opts[$baseprop] = $o->Opts[$baseprop];
@@ -62,7 +90,8 @@ foreach ($clip->Items as $item) {
 		
 		if ($ARPEGGIO_SEQUENCE == "down") $userObj->Opts['Dir'] = 'down';
 		
-		$userObj->Opts['Rate'] = nw_aafield($ARPDURConvert,$ARPEGGIO_DURATION,16);
+		$chordDurMinRate = nw_aafield($ARPDURConvert,$baseDur,32) * 4;
+		$userObj->Opts['Rate'] = max($chordDurMinRate,$requestedRate);
 
 		echo $userObj->ReconstructClipText()."\n";
 
@@ -81,9 +110,13 @@ foreach ($clip->Items as $item) {
 		$ArpeggioAllowedHere = !isset($o->Opts["Dur"]["Grace"]);
 	else if ($o->GetObjType() == "Bar")
 		$ArpeggioAllowedHere = true;
+
+	$PlayContext->UpdateContext($o);
 	}
 
 echo NWC2_ENDCLIP."\n";
+
+if ($WarnAboutInboundTie)  fputs(STDERR,"Warning: Adding Arpeggio to tied notes is not recommended.\n\nPress OK to add the Arpeggio anyway.");
 
 exit(NWC2RC_SUCCESS);
 ?>
