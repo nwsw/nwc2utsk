@@ -114,7 +114,7 @@ foreach ($clip->Items as $item) {
 
 echo NWC2_ENDCLIP."\n";
 
-if ($WarnAboutInboundTie)  fputs(STDERR,"Warning: Adding Arpeggio to tied notes is not recommended.\n\nPress OK to add the Arpeggio anyway.");
+if ($WarnAboutInboundTie)  fputs(STDERR,"Warning: Adding Arpeggio within tied notes is not recommended.\n\nPress OK to add the Arpeggio anyway.");
 
 exit(NWC2RC_SUCCESS);
 ?>
