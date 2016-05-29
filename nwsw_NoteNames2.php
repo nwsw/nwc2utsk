@@ -1,6 +1,6 @@
-<?
+<?php
 /*******************************************************************************
-nwsw_NoteNames.php Version 1.50
+nwsw_NoteNames.php Version 1.50.1
 
 This script will will automatically create text that includes all of the note 
 names for the notes in the staff.

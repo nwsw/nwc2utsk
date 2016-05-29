@@ -1,12 +1,12 @@
-<?
+<?php
 /*******************************************************************************
-nwsw_BarNumberDemo.php Version 1.0
+nwsw_BarNumberDemo.php Version 1.01
 
 This script demonstrates how to work with bar numbers from within a user tool.
 It adds a hidden text instruction to the start of every measure in a staff of
 the form: "Bar #"
 
-Copyright © 2010 by NoteWorthy Software, Inc.
+Copyright © 2016 by NoteWorthy Software, Inc.
 All Rights Reserved
 
 HISTORY:

@@ -1,4 +1,4 @@
-<?
+<?php
 //	T R A S N P O S E _ C H O R D S . P H P
 
 //	Author(s):		Copyright (c)2004 Andrew Purdam	(ADP)

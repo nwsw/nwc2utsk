@@ -1,4 +1,4 @@
-<?
+<?php
 //	R A N G E S . P H P
 
 //	Author(s):		Andrew Purdam	(ADP)

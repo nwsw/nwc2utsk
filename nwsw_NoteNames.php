@@ -1,6 +1,6 @@
-<?
+<?php
 /*******************************************************************************
-nwsw_NoteNames.php Version 2.00
+nwsw_NoteNames.php Version 2.01
 
 This script will will automatically create text that includes all of the note 
 names for the notes in the staff.
@@ -14,7 +14,7 @@ Prompting for staff mode can be added with the following command line:
 Prompting for staff versus lyric mode can be added with the following command line:
 "/mode=<PROMPT:Mode:=|inline|lyric>"
 
-Copyright © 2010 by NoteWorthy Software, Inc.
+Copyright © 2016 by NoteWorthy Software, Inc.
 All Rights Reserved
 
 HISTORY:

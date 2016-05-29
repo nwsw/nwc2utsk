@@ -1,6 +1,6 @@
-<?
+<?php
 /*******************************************************************************
-nwsw_ShapeNotes.php Version 1.02
+nwsw_ShapeNotes.php Version 1.03
 
 This script will will automatically convert all notes in the file, or selection,
 to use shape notes. It relies on the proper tonic to be set for each key signature
